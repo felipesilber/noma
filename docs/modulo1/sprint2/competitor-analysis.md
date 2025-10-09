@@ -1,0 +1,16 @@
+# Competitor Analysis
+
+## Introduction
+In order to better understand the competitive landscape of a social network for bar and restaurant consumers, we analyzed several existing platforms. The table below presents their **key features, differentiators, limitations, and official websites**. This analysis helps in identifying potential market gaps and opportunities for innovation.
+
+---
+
+## Competitor Comparison
+
+| Competitor        | Description  | Key Features  | Differentiators  | Limitations  | Website |
+|------------------|-------------|--------------|-----------------|--------------|---------|
+| **TripAdvisor** | Global platform for reviews and recommendations of restaurants, hotels, and tourist attractions. | - User reviews and ratings.  <br> - Establishment rankings by region.  <br> - Photos and comments.  <br> - Restaurant reservations in some locations.  <br> - Q&A feature. | - Large user base.  <br> - Well-established ranking system.  <br> - Direct reservation option. | - Generic system, lacking user personalization.  <br> - Reviews can be unreliable due to fake or purchased ratings.  <br> - Interface does not focus on social interaction. | [tripadvisor.com](https://www.tripadvisor.com) |
+| **Google Reviews** | Review system integrated with Google Maps and Google Search, allowing feedback on establishments. | - Ratings and comments on listed places.  <br> - Automatic display when searching for a restaurant or bar.  <br> - Maps and route integration.  <br> - Frequent updates with new reviews. | - Embedded in Google, making it highly accessible.  <br> - High volume of reviews.  <br> - Integration with business hours and location. | - Lacks an interactive social system.  <br> - Reviews are scattered and lack content curation.  <br> - Many generic reviews and bot-manipulated ratings. | [google.com/maps](https://www.google.com/maps) |
+| **The Fork (by TripAdvisor)** | Restaurant reservation platform offering discounts and user reviews. | - Online restaurant reservations.  <br> - Loyalty program with discounts.  <br> - Restaurant review system. | - Focused on the dining experience, with exclusive discounts.  <br> - Works well for reservations and promotions. | - Limited restaurant base in some cities.  <br> - Less focused on social discovery and user interaction. <br> - No presence in Brazil| [thefork.com](https://www.thefork.com) |
+| **Yelp** | Social network for business reviews, including bars and restaurants. | - Detailed reviews and recommendation system.  <br> - Personalized lists of favorite places.  <br> - "Elite Yelpers" system for highly active users. | - Well-structured and engaged community.  <br> - Strong presence in the U.S. and Europe. | - Low adoption in Brazil.  <br> - Less popular among Brazilian users, limiting review volume. | [yelp.com](https://www.yelp.com) |
+| **Foursquare (Swarm)** | Social check-in app where users mark their presence and recommend places. | - Check-ins and recommendations based on location.  <br> - Lists of visited and favorite locations.  <br> - Badge system and gamification. | - Strongly gamified, encouraging continuous use.  <br> - Loyal and engaged community. | - Has lost relevance in recent years.  <br> - Low usage in Brazil, limiting reach. | [foursquare.com](https://www.foursquare.com) |

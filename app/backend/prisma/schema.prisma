@@ -1,0 +1,190 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PriceLevel {
+  ONE
+  TWO
+  THREE
+  FOUR
+}
+
+enum Weekday {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  firebaseUid    String          @unique
+  username       String?         @unique
+  email          String?         @unique
+  avatarUrl      String?
+  level          Int             @default(1)
+  createdAt      DateTime        @default(now())
+  reviews        Review[]
+  lists          List[]
+  savedPlaces    SavedPlace[]
+  favoritePlaces FavoritePlace[]
+  followers      Follow[]        @relation("Followers")
+  following      Follow[]        @relation("Following")
+}
+
+model Place {
+  id             Int                 @id @default(autoincrement())
+  name           String
+  description    String?
+  address        String
+  imageUrl       String?
+  siteUrl        String?
+  category       Category            @relation(fields: [categoryId], references: [id])
+  categoryId     Int
+  reviews        Review[]
+  savedPlaces    SavedPlace[]
+  favoritePlaces FavoritePlace[]
+  listItems      ListItem[]
+  phone          String?
+  latitude       Float?
+  longitude      Float?
+  priceLevel     PriceLevel?
+  priceRange     String?
+  photos         Photo[]
+  tags           Tag[]
+  openingHours   PlaceOpeningHours?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  url       String
+  place     Place    @relation(fields: [placeId], references: [id])
+  placeId   Int
+  createdAt DateTime @default(now())
+}
+
+model Tag {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  places Place[]
+}
+
+model PlaceOpeningHours {
+  id              Int      @id @default(autoincrement())
+  place           Place    @relation(fields: [placeId], references: [id])
+  placeId         Int      @unique
+  statusNow       Boolean?
+  closesAt        String?
+  opensAt         String?
+  monday          String?
+  tuesday         String?
+  wednesday       String?
+  thursday        String?
+  friday          String?
+  saturday        String?
+  sunday          String?
+  mondayBlocks    Json?
+  tuesdayBlocks   Json?
+  wednesdayBlocks Json?
+  thursdayBlocks  Json?
+  fridayBlocks    Json?
+  saturdayBlocks  Json?
+  sundayBlocks    Json?
+}
+
+model SavedPlace {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  place     Place    @relation(fields: [placeId], references: [id])
+  placeId   Int
+  createdAt DateTime @default(now())
+
+  @@unique([userId, placeId])
+}
+
+model Category {
+  id     Int     @id @default(autoincrement())
+  name   String  @unique
+  emoji  String?  @db.Text
+  colorHex String?  @db.VarChar(9)
+  textColorHex String?  @db.VarChar(9)
+  places Place[]
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  place     Place    @relation(fields: [placeId], references: [id])
+  placeId   Int
+  generalRating    Int
+  foodRating       Int
+  serviceRating    Int
+  environmentRating Int
+  comment   String?
+  price     Decimal?
+  createdAt DateTime @default(now())
+}
+
+model Follow {
+  id         Int  @id @default(autoincrement())
+  follower   User @relation("Following", fields: [followerId], references: [id])
+  followerId Int
+  followed   User @relation("Followers", fields: [followedId], references: [id])
+  followedId Int
+
+  @@unique([followerId, followedId])
+}
+
+model List {
+  id          Int        @id @default(autoincrement())
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  name        String
+  description String?
+  items       ListItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model ListItem {
+  id      Int      @id @default(autoincrement())
+  list    List     @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId  Int
+  place   Place    @relation(fields: [placeId], references: [id])
+  placeId Int
+  order   Int?
+  addedAt DateTime @default(now())
+
+  @@unique([listId, placeId])
+  @@index([listId])
+}
+
+model FavoritePlace {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  placeId   Int
+  order     Int
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place Place @relation(fields: [placeId], references: [id])
+
+  @@unique([userId, placeId])
+  @@unique([userId, order])
+  @@index([userId])
+}
