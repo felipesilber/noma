@@ -9,19 +9,25 @@ import { SavedPlaceModule } from './saved-places/saved-places.module';
 import { AuthModule } from './auth/auth.module';
 import { ProfileModule } from './profile/profile.module';
 import { ListModule } from './list/list.module';
-
+import { FeedModule } from './feed/feed.module';
+import { RatingModule } from './rating/rating.module';
+import { FavoriteModule } from './favorite/favorites.module';
 @Module({
-  imports: [
-    PrismaModule,
-    PlaceModule,
-    CategoryModule,
-    ReviewModule,
-    FollowModule,
-    UserModule,
-    SavedPlaceModule,
-    AuthModule,
-    ProfileModule,
-    ListModule,
-  ],
+    imports: [
+        PrismaModule,
+        PlaceModule,
+        CategoryModule,
+        ReviewModule,
+        FollowModule,
+        UserModule,
+        SavedPlaceModule,
+        AuthModule,
+        ProfileModule,
+        ListModule,
+        FeedModule,
+        RatingModule,
+        FavoriteModule,
+    ],
 })
-export class AppModule {}
+export class AppModule {
+}

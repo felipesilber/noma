@@ -1,504 +1,279 @@
-import React, { useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  Alert,
-  Linking,
-  ActivityIndicator,
-} from "react-native";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, ActivityIndicator, StyleSheet, Platform, } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
-
+import moment from "moment";
+import "moment/locale/pt-br";
+import AppText from "../../../components/text";
+import { showErrorNotification, showSuccessNotification } from "../../../utils/notifications";
+import RatingsSummary from "./components/RatingsSummary";
 function formatRating(v) {
-  return typeof v === "number" && !Number.isNaN(v) ? String(v) : "-";
+    return typeof v === "number" && !Number.isNaN(v) ? String(v.toFixed(1)) : "-";
 }
-function toSymbolPrice(level) {
-  if (!level) return undefined;
-  if (["ONE", "TWO", "THREE", "FOUR"].includes(level)) {
-    const map = { ONE: "$", TWO: "$$", THREE: "$$$", FOUR: "$$$$" };
-    return map[level];
-  }
-  return level;
-}
-function hoursBadgeText(oh) {
-  if (!oh) return "-";
-  return oh.status === "Aberto" ? "Aberto" : "Fechado";
-}
-
+const RatingBar = ({ rating }) => {
+    const percentage = rating ? (rating / 5) * 100 : 0;
+    return (<View style={styles.ratingBarBackground}>
+      <View style={[styles.ratingBarFill, { width: `${percentage}%` }]}/>
+    </View>);
+};
+const ReviewCard = ({ review }) => {
+    const timeAgo = moment(review.createdAt).locale("pt-br").fromNow();
+    const userName = review.user?.name || "Usuário";
+    const avatarUrl = review.user?.avatarUrl ||
+        "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/male/512/20.jpg";
+    return (<View style={styles.reviewCardContainer}>
+      <Image source={{ uri: avatarUrl }} style={styles.reviewAvatar}/>
+      <View style={styles.reviewContent}>
+        <View style={styles.reviewHeader}>
+          <View>
+            <AppText weight="bold" style={styles.reviewUserName}>
+              {userName}
+            </AppText>
+            <AppText style={styles.reviewTimeAgo}>{timeAgo}</AppText>
+          </View>
+          <View style={styles.reviewRating}>
+            <Ionicons name="star" size={16} color={colors.star} style={{ marginRight: 4 }}/>
+            <AppText weight="bold" style={styles.reviewRatingValue}>
+              {formatRating(review.rating)}
+            </AppText>
+          </View>
+        </View>
+        <AppText style={styles.reviewText}>{review.text}</AppText>
+      </View>
+    </View>);
+};
+const MapPlaceholder = ({ onPressDirections }) => (<View style={styles.mapPlaceholderContainer}>
+    <Image source={{ uri: "https://via.placeholder.com/400x200.png?text=Mapa+Aqui" }} style={styles.mapPlaceholderImage}/>
+    <TouchableOpacity style={styles.mapDirectionsButton} onPress={onPressDirections}>
+      <Ionicons name="navigate" size={20} color={colors.surface}/>
+    </TouchableOpacity>
+  </View>);
+const OpeningHoursSection = ({ hours }) => (<View style={styles.hoursContainer}>
+    {hours.map((item, index) => (<View key={index} style={styles.hourRow}>
+        {index === 0 && (<Ionicons name="time-outline" size={18} color={colors.textSecondary} style={styles.hourIcon}/>)}
+        <AppText style={[styles.hourDay, index !== 0 && { marginLeft: 28 }]}>
+          {item.day}
+        </AppText>
+        <AppText style={[
+            styles.hourTime,
+            item.day === "Domingo" && styles.hourTimeHighlight,
+        ]}>
+          {item.hours}
+        </AppText>
+      </View>))}
+  </View>);
+const TagsSection = ({ tags }) => (<View style={styles.tagsContainer}>
+    {tags.map((tag, index) => {
+        const tagText = tag.startsWith("#") ? tag : `#${tag}`;
+        return (<View key={index} style={styles.tag}>
+          <AppText style={styles.tagText}>{tagText}</AppText>
+        </View>);
+    })}
+  </View>);
 const PlaceDetailScreen = ({ route, navigation }) => {
-  const { placeId, friendIds } = route.params || {};
-  const [place, setPlace] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [showFullHours, setShowFullHours] = useState(false);
-
-  const [isSaved, setIsSaved] = useState(false);
-  const [saving, setSaving] = useState(false);
-
-  const headerImage = useMemo(() => {
-    return (
-      place?.image ||
-      place?.imageUrl ||
-      place?.photos?.[0]?.url ||
-      "https://picsum.photos/id/163/600/400"
-    );
-  }, [place]);
-
-  const priceLevelSymbols = useMemo(
-    () => toSymbolPrice(place?.priceLevel),
-    [place?.priceLevel]
-  );
-
-  useEffect(() => {
-    let alive = true;
-    async function load() {
-      try {
+    const { placeId } = route.params || {};
+    const [place, setPlace] = useState(null);
+    const [ratingsData, setRatingsData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isSaved, setIsSaved] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const headerImage = useMemo(() => {
+        return place?.imageUrls?.[0] || "https://picsum.photos/id/163/600/400";
+    }, [place]);
+    const fetchData = useCallback(async () => {
         if (!placeId) {
-          setLoading(false);
-          Alert.alert("Erro", "ID do local não informado.");
-          return;
+            setError("ID do local não informado.");
+            setLoading(false);
+            return;
         }
-        const resp = await api.get(`/place/${placeId}`, {
-          params: friendIds?.length
-            ? { friendIds: friendIds.join(",") }
-            : undefined,
-        });
-        let data = resp.data;
-        if (Array.isArray(data?.tags)) {
-          data = {
-            ...data,
-            tags: data.tags
-              .map((t) => (typeof t === "string" ? t : t?.name))
-              .filter(Boolean),
-          };
+        setLoading(true);
+        setError(null);
+        try {
+            const [detailsResponse, ratingsResponse] = await Promise.all([
+                api.get(`/places/${placeId}`),
+                api.get(`/places/${placeId}/ratings`),
+            ]);
+            console.log(ratingsResponse.data);
+            setPlace(detailsResponse.data);
+            setRatingsData(ratingsResponse.data);
+            setIsSaved(detailsResponse.data.isSaved);
         }
-        if (alive) setPlace(data);
-      } catch {
-        Alert.alert("Erro", "Não foi possível carregar o lugar.");
-      } finally {
-        if (alive) setLoading(false);
-      }
-    }
-    load();
-    return () => {
-      alive = false;
+        catch (e) {
+            console.error("Failed to load place data:", e);
+            setError("Não foi possível carregar os dados do lugar.");
+            setPlace(null);
+            setRatingsData(null);
+        }
+        finally {
+            setLoading(false);
+        }
+    }, [placeId]);
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+    const toggleSaved = async () => {
+        if (saving)
+            return;
+        setSaving(true);
+        try {
+            if (isSaved) {
+                await api.delete(`/saved-places/${placeId}`);
+                setIsSaved(false);
+                showSuccessNotification("Removido dos salvos", undefined, {
+                    position: "bottom",
+                });
+            }
+            else {
+                await api.put(`/saved-places/${placeId}`);
+                setIsSaved(true);
+                showSuccessNotification("Salvo", "Lugar adicionado aos salvos.", {
+                    position: "bottom",
+                });
+            }
+        }
+        catch (e) {
+            console.error("Erro ao alternar salvo:", e);
+            showErrorNotification("Erro", "Não foi possível atualizar os salvos.", { position: "bottom" });
+        }
+        finally {
+            setSaving(false);
+        }
     };
-  }, [placeId, Array.isArray(friendIds) ? friendIds.join(",") : friendIds]);
-
-  useEffect(() => {
-    let alive = true;
-    async function checkSaved() {
-      try {
-        if (!placeId) return;
-        const { data } = await api.get(`/saved-places/${placeId}`);
-        if (alive) setIsSaved(!!data?.saved);
-      } catch {}
-    }
-    checkSaved();
-    return () => {
-      alive = false;
+    const goToAddReview = () => {
     };
-  }, [placeId]);
-
-  const toggleSaved = async () => {
-    if (!placeId || saving) return;
-    const next = !isSaved;
-    setIsSaved(next);
-    setSaving(true);
-    try {
-      if (next) await api.put(`/saved-places/${placeId}`);
-      else await api.delete(`/saved-places/${placeId}`);
-    } catch {
-      setIsSaved(!next);
-      Alert.alert("Erro", "Não foi possível atualizar seus salvos.");
-    } finally {
-      setSaving(false);
+    const handleCopyAddress = async () => {
+    };
+    const handleGetDirections = () => {
+    };
+    if (loading) {
+        return (<View style={styles.centered}>
+        <ActivityIndicator size="large" color={colors.primary}/>
+      </View>);
     }
-  };
-
-  const goToAddReview = () => {
-    navigation.navigate("AddReviewFlow", {
-      screen: "AddReviewForm",
-      params: {
-        placeId,
-        placeName: place?.name || "",
-        placeImage: place?.imageUrl || "",
-      },
-    });
-  };
-
-  const handleCopyAddress = async () => {
-    if (place?.address) {
-      await Clipboard.setStringAsync(place.address);
-      Alert.alert("Copiado!", "Endereço copiado para a área de transferência.");
-    }
-  };
-  const handleCall = () => {
-    if (place?.phone) Linking.openURL(`tel:${place.phone}`);
-    else Alert.alert("Erro", "Número de telefone não disponível.");
-  };
-  const handleGetDirections = () => {
-    if (place?.latitude && place?.longitude) {
-      const url = `https://www.google.com/maps/search/?api=1&query=${place.latitude},${place.longitude}`;
-      Linking.openURL(url);
-      return;
-    }
-    if (place?.address) {
-      const encoded = encodeURIComponent(place.address);
-      Linking.openURL(
-        `https://www.google.com/maps/search/?api=1&query=${encoded}`
-      );
-    } else {
-      Alert.alert("Rotas", "Localização não disponível.");
-    }
-  };
-  const handleOpenWebsite = () => {
-    if (place?.siteUrl) Linking.openURL(place.siteUrl);
-    else Alert.alert("Erro", "Site não disponível.");
-  };
-
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.center]}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
-
-  if (!place) {
-    return (
-      <View style={[styles.container, styles.center]}>
-        <Text style={{ color: colors.textSecondary }}>
-          Local não encontrado.
-        </Text>
-      </View>
-    );
-  }
-
-  const reviewCountText =
-    typeof place?.reviewCount === "number" ? `${place.reviewCount}` : "-";
-
-  const precoMedio = place?.priceRange
-    ? place.priceRange
-    : priceLevelSymbols
-    ? priceLevelSymbols
-    : "-";
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.topBar}>
-        <TouchableOpacity
-          style={styles.topBarButton}
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="arrow-back" size={22} color={colors.surface} />
+    if (error || !place || !ratingsData) {
+        return (<View style={styles.centered}>
+        <AppText style={styles.errorText}>
+          {error || "Ocorreu um erro."}
+        </AppText>
+        <TouchableOpacity onPress={fetchData} style={styles.retryButton}>
+          <AppText weight="bold" style={styles.retryButtonText}>
+            Tentar Novamente
+          </AppText>
         </TouchableOpacity>
-
+      </View>);
+    }
+    const { overall, totalReviews, food, service, ambiance, friendsRating } = ratingsData;
+    return (<View style={styles.container}>
+      <View style={styles.topBar}>
+        <TouchableOpacity style={styles.topBarButton} onPress={() => navigation.goBack()} activeOpacity={0.85}>
+          <Ionicons name="arrow-back" size={22} color={colors.textPrimary}/>
+        </TouchableOpacity>
         <View style={styles.topBarRight}>
-          <TouchableOpacity
-            style={styles.topBarButton}
-            onPress={toggleSaved}
-            disabled={saving}
-            activeOpacity={0.85}
-          >
-            <Ionicons
-              name={isSaved ? "bookmark" : "bookmark-outline"}
-              size={22}
-              color={colors.surface}
-            />
+          <TouchableOpacity style={styles.topBarButton} onPress={toggleSaved} disabled={saving} activeOpacity={0.85}>
+            <Ionicons name={isSaved ? "bookmark" : "bookmark-outline"} size={22} color={colors.textPrimary}/>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.topBarButton}
-            onPress={goToAddReview}
-            activeOpacity={0.85}
-          >
-            <Ionicons name="add" size={24} color={colors.surface} />
+          <TouchableOpacity style={styles.topBarButton} onPress={() => { }} activeOpacity={0.85}>
+            <Ionicons name="share-outline" size={22} color={colors.textPrimary}/>
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <Image source={{ uri: headerImage }} style={styles.headerImage} />
+        <Image source={{ uri: headerImage }} style={styles.headerImage}/>
 
         <View style={styles.contentContainer}>
-          <Text style={styles.placeName}>{place.name}</Text>
-          {!!place.category && (
-            <Text style={styles.placeCategory}>{place.category}</Text>
-          )}
+          <View style={styles.nameStatusRow}>
+            <AppText weight="bold" style={styles.placeName}>
+              {place.name}
+            </AppText>
+            {place.status && (<View style={[
+                styles.statusBadge,
+                place.status === "Aberto"
+                    ? styles.statusBadgeOpen
+                    : styles.statusBadgeClosed,
+            ]}>
+                <Ionicons name="time-outline" size={12} color={place.status === "Aberto"
+                ? colors.successDark
+                : colors.errorDark} style={{ marginRight: 4 }}/>
+                <AppText weight="bold" style={[
+                styles.statusBadgeText,
+                place.status === "Aberto"
+                    ? styles.statusBadgeTextOpen
+                    : styles.statusBadgeTextClosed,
+            ]}>
+                  {place.status}
+                </AppText>
+              </View>)}
+          </View>
+          <AppText style={styles.placeCategory}>{place.category}</AppText>
+          {place.priceInfo && (<View style={styles.infoRow}>
+              <Ionicons name="cash-outline" size={18} color={colors.textSecondary} style={styles.infoIcon}/>
+              <AppText style={styles.infoText}>{place.priceInfo}</AppText>
+            </View>)}
+          {place.address && (<View style={styles.infoRow}>
+              <Ionicons name="location-outline" size={18} color={colors.textSecondary} style={styles.infoIcon}/>
+              <AppText style={styles.infoTextAddress} numberOfLines={2}>
+                {place.address}
+              </AppText>
+              {place.distanceInKm != null && (<View style={styles.distanceContainer}>
+                  <Ionicons name="walk-outline" size={16} color={colors.primary} style={{ marginRight: 2 }}/>
+                  <AppText weight="bold" style={styles.distanceText}>
+                    {place.distanceInKm.toFixed(1)} km
+                  </AppText>
+                </View>)}
+            </View>)}
 
-          {!!place.address && (
-            <View style={styles.addressContainer}>
-              <Text style={styles.placeAddress}>{place.address}</Text>
-              <TouchableOpacity onPress={handleCopyAddress}>
-                <Ionicons
-                  name="copy-outline"
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.copyIcon}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
+          <RatingsSummary ratings={ratingsData}/>
 
-          {/* Botões: largura total, gap ~8, raio menor */}
-          <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity
-              style={[styles.actionButtonWide, { marginRight: 8 }]}
-              onPress={handleCall}
-            >
-              <Ionicons
-                name="call-outline"
-                size={16}
-                color={colors.surface}
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.actionButtonText}>Ligar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.actionButtonWide, { marginRight: 8 }]}
-              onPress={handleGetDirections}
-            >
-              <Ionicons
-                name="navigate-outline"
-                size={16}
-                color={colors.surface}
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.actionButtonText}>Como chegar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.actionButtonWide}
-              onPress={handleOpenWebsite}
-            >
-              <Ionicons
-                name="globe-outline"
-                size={16}
-                color={colors.surface}
-                style={{ marginRight: 6 }}
-              />
-              <Text style={styles.actionButtonText}>Site</Text>
-            </TouchableOpacity>
+          <TouchableOpacity style={styles.evaluateButton} onPress={goToAddReview}>
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.surface} style={{ marginRight: 8 }}/>
+            <AppText weight="bold" style={styles.evaluateButtonText}>
+              Avaliar
+            </AppText>
+          </TouchableOpacity>
+
+          <View style={styles.reviewsSectionContainer}>
+            <AppText weight="bold" style={styles.sectionTitle}>
+              Avaliações ({totalReviews || place.reviews?.length || 0})
+            </AppText>
+            {place.reviews && place.reviews.length > 0 ? (<>
+                {place.reviews.map((review, index) => (<ReviewCard key={index} review={review}/>))}
+                {totalReviews > place.reviews.length && (<TouchableOpacity style={styles.seeAllReviewsButton} onPress={() => navigation.navigate("PlaceAllReviews", { placeId })}>
+                    <AppText weight="bold" style={styles.seeAllReviewsButtonText}>
+                      Ver todos as avaliações
+                    </AppText>
+                  </TouchableOpacity>)}
+              </>) : (<AppText style={styles.emptyReviewsText}>
+                Ainda não há avaliações para este lugar.
+              </AppText>)}
           </View>
 
-          {/* Linha com 4 infos: Horário | Público | Amigos | Preço */}
-          <View style={styles.infoRowUnified}>
-            {/* Horário */}
-            <View style={styles.infoItemUnified}>
-              <Ionicons
-                name="time-outline"
-                size={16}
-                color={
-                  place?.openingHours?.status === "Aberto"
-                    ? colors.success
-                    : colors.textSecondary
-                }
-                style={styles.infoIconUnified}
-              />
-              <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabelUnified}>Horário</Text>
-                <Text
-                  style={[
-                    styles.infoValueUnified,
-                    place?.openingHours?.status === "Aberto"
-                      ? styles.infoOpen
-                      : styles.infoClosed,
-                  ]}
-                >
-                  {hoursBadgeText(place?.openingHours)}
-                </Text>
-              </View>
-            </View>
+          <AppText weight="bold" style={styles.sectionTitle}>
+            Localização
+          </AppText>
+          <MapPlaceholder onPressDirections={handleGetDirections}/>
 
-            <View style={styles.infoDividerUnified} />
+          <AppText weight="bold" style={styles.sectionTitle}>
+            Horário de Funcionamento
+          </AppText>
+          {place.openingHours && place.openingHours.length > 0 ? (<OpeningHoursSection hours={place.openingHours}/>) : (<AppText style={styles.emptyInfoText}>
+              Horário de funcionamento não disponível.
+            </AppText>)}
 
-            {/* Público */}
-            <View style={styles.infoItemUnified}>
-              <Ionicons
-                name="star"
-                size={16}
-                color={colors.textSecondary}
-                style={styles.infoIconUnified}
-              />
-              <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabelUnified}>Público</Text>
-                <Text style={styles.infoValueUnified}>
-                  {formatRating(place?.avgRating)}
-                </Text>
-              </View>
-            </View>
+          <AppText weight="bold" style={styles.sectionTitle}>
+            Tags
+          </AppText>
+          {place.tags && place.tags.length > 0 ? (<TagsSection tags={place.tags}/>) : (<AppText style={styles.emptyInfoText}>
+              Nenhuma tag disponível.
+            </AppText>)}
 
-            <View style={styles.infoDividerUnified} />
-
-            {/* Amigos */}
-            <View style={styles.infoItemUnified}>
-              <Ionicons
-                name="people-outline"
-                size={16}
-                color={colors.textSecondary}
-                style={styles.infoIconUnified}
-              />
-              <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabelUnified}>Amigos</Text>
-                <Text style={styles.infoValueUnified}>
-                  {formatRating(place?.friendsRating)}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.infoDividerUnified} />
-
-            {/* Preço */}
-            <View style={styles.infoItemUnified}>
-              <Ionicons
-                name="cash-outline"
-                size={16}
-                color={colors.textSecondary}
-                style={styles.infoIconUnified}
-              />
-              <View style={styles.infoTextGroup}>
-                <Text style={styles.infoLabelUnified}>Preço</Text>
-                <Text style={styles.infoValueUnified}>
-                  {place?.priceRange || priceLevelSymbols || "-"}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Classificações (sem bordas/divisórias, com estrela ao lado) */}
-          <Text style={styles.sectionTitle}>
-            Classificações{" "}
-            <Text style={styles.sectionSubtitle}>
-              ({reviewCountText} avaliações)
-            </Text>
-          </Text>
-
-          <View style={styles.ratingsListPlain}>
-            <View style={styles.ratingRowPlain}>
-              <Text style={styles.ratingRowLabel}>Geral</Text>
-              <View style={styles.ratingValueWithIcon}>
-                <Ionicons name="star" size={16} color={colors.textSecondary} />
-                <Text style={styles.ratingRowValue}>
-                  {formatRating(place?.avgRating)}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.ratingRowPlain}>
-              <Text style={styles.ratingRowLabel}>Comida</Text>
-              <View style={styles.ratingValueWithIcon}>
-                <Ionicons name="star" size={16} color={colors.textSecondary} />
-                <Text style={styles.ratingRowValue}>
-                  {formatRating(place?.avgFood)}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.ratingRowPlain}>
-              <Text style={styles.ratingRowLabel}>Serviço</Text>
-              <View style={styles.ratingValueWithIcon}>
-                <Ionicons name="star" size={16} color={colors.textSecondary} />
-                <Text style={styles.ratingRowValue}>
-                  {formatRating(place?.avgService)}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.ratingRowPlain}>
-              <Text style={styles.ratingRowLabel}>Ambiente</Text>
-              <View style={styles.ratingValueWithIcon}>
-                <Ionicons name="star" size={16} color={colors.textSecondary} />
-                <Text style={styles.ratingRowValue}>
-                  {formatRating(place?.avgEnvironment)}
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {!!place.visitedByFriends?.length && (
-            <>
-              <Text style={styles.sectionTitle}>Visitado por</Text>
-              <View style={styles.visitedByContainer}>
-                {place.visitedByFriends.map((f) => (
-                  <Image
-                    key={f.id}
-                    source={{ uri: f.avatar }}
-                    style={styles.friendAvatar}
-                  />
-                ))}
-              </View>
-            </>
-          )}
-
-          {!!place.openingHours && (
-            <>
-              <Text style={styles.sectionTitle}>Horário de funcionamento</Text>
-              <TouchableOpacity
-                style={styles.hoursSummaryContainer}
-                onPress={() => setShowFullHours(!showFullHours)}
-              >
-                {!!place.openingHours.status && (
-                  <Text
-                    style={[
-                      styles.hoursStatus,
-                      place.openingHours.status === "Aberto"
-                        ? styles.statusOpen
-                        : styles.statusClosed,
-                    ]}
-                  >
-                    {place.openingHours.status}
-                  </Text>
-                )}
-                <Ionicons
-                  name={
-                    showFullHours
-                      ? "chevron-up-outline"
-                      : "chevron-down-outline"
-                  }
-                  size={20}
-                  color={colors.textSecondary}
-                  style={styles.hoursToggleIcon}
-                />
-              </TouchableOpacity>
-
-              {showFullHours && !!place.openingHours.details?.length && (
-                <View style={styles.fullHoursContainer}>
-                  {place.openingHours.details.map((d, idx) => (
-                    <Text key={idx} style={styles.fullHoursText}>
-                      {d}
-                    </Text>
-                  ))}
-                </View>
-              )}
-            </>
-          )}
-
-          {/* Tags no fim */}
-          {!!place.tags?.length && (
-            <>
-              <Text style={styles.sectionTitle}>Tags</Text>
-              <View style={styles.tagsContainer}>
-                {place.tags.map((tag, i) => (
-                  <View key={`${tag}-${i}`} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
-                  </View>
-                ))}
-              </View>
-            </>
-          )}
-
-          <Text style={styles.sectionTitle}>Localização</Text>
-          <View style={styles.grayMapPlaceholder}>
-            <Text style={styles.noMapText}>Mapa será exibido aqui</Text>
-          </View>
-
-          <View style={{ height: 50 }} />
+          <View style={{ height: 40 }}/>
         </View>
       </ScrollView>
-    </View>
-  );
+    </View>);
 };
-
 export default PlaceDetailScreen;

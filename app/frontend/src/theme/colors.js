@@ -1,17 +1,18 @@
 const colors = {
-  background: "#FAF9F6", // Fundo principal
-  surface: "#FFFFFF", // Cards, áreas elevadas
-
-  textPrimary: "#212121", // Texto principal
-  textSecondary: "#616161", // Texto secundário
-  divider: "#E0E0E0", // Linhas e separadores sutis
-
-  primary: "#FF7043", // Botão principal / CTA
-  secondary: "#FAF9F6", // Fundo de botões secundários (com borda)
-
-  success: "#4CAF50", // Sucesso / confirmação
-  warning: "#FBC02D", // Alerta
-  error: "#D32F2F", // Erro
+    primary: "#3B82F6",
+    background: "#111318",
+    surface: "#1E1E1E",
+    textPrimary: "#FFFFFF",
+    textSecondary: "#9ca6ba",
+    divider: "#282e39",
+    star: "#FFC107",
+    success: "#22C55E",
+    successLight: "rgba(34, 197, 94, 0.5)",
+    successDark: "#6EE7B7",
+    error: "#EF4444",
+    tagBackground: "rgba(59, 130, 246, 0.2)",
+    tagText: "#3B82F6",
+    connectButtonBg: "#282e39",
+    connectButtonText: "#FFFFFF",
 };
-
 export default colors;

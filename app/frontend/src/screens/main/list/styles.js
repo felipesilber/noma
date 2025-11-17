@@ -1,0 +1,75 @@
+import { StyleSheet } from "react-native";
+import colors from "../../../theme/colors";
+const PADDING = 16;
+export default StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: colors.background || "#FFFFFF",
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: colors.background || "#FFFFFF",
+    },
+    headerContainer: {
+        paddingHorizontal: PADDING,
+        paddingTop: 20,
+        paddingBottom: 24,
+        alignItems: "flex-start",
+    },
+    listImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 12,
+        marginBottom: 16,
+        backgroundColor: colors.divider,
+    },
+    listName: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: colors.textPrimary,
+        marginBottom: 6,
+    },
+    listMetadata: {
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: colors.textPrimary,
+        paddingHorizontal: PADDING,
+        marginBottom: 8,
+    },
+    placesListContainer: {
+        paddingHorizontal: PADDING,
+    },
+    placeItemContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.divider,
+    },
+    placeItemImage: {
+        width: 56,
+        height: 56,
+        borderRadius: 8,
+        marginRight: 12,
+        backgroundColor: colors.divider,
+    },
+    placeItemInfo: {
+        flex: 1,
+    },
+    placeItemName: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: colors.textPrimary,
+        marginBottom: 4,
+    },
+    placeItemDetails: {
+        fontSize: 14,
+        color: colors.textSecondary,
+    },
+});

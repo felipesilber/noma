@@ -1,220 +1,210 @@
 import React from "react";
-import { Platform, TouchableOpacity } from "react-native";
+import { Platform, TouchableOpacity, Text } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-
 import colors from "../theme/colors";
 import AppTheme from "../theme/theme";
-
 import LoginScreen from "../screens/auth/login";
 import RegisterScreen from "../screens/auth/register";
 import SigninScreen from "../screens/auth/signin";
-
 import HomeScreen from "../screens/main/home";
 import ProfileScreen from "../screens/main/profile";
 import SavedScreen from "../screens/main/saved";
 import PlaceDetailScreen from "../screens/main/place-detail";
-
-import ExploreScreen from "../screens/main/explore";
-import CategoryScreen from "../screens/main/explore/category";
+import AllReviewsScreen from "../screens/main/place-detail/all-reviews";
+import ListDetailScreen from "../screens/main/list";
+import ExploreLandingScreen from "../screens/main/explore/choose-type";
+import ExploreCategoryScreen from "../screens/main/explore/category/search";
+import CategoryScreen from "../screens/main/explore/category/one-category";
+import ExplorePeopleScreen from "../screens/main/explore/people";
 import SearchScreen from "../screens/main/explore/search";
-
 import AddReviewSearchScreen from "../screens/main/add-review/search";
 import AddReviewFormScreen from "../screens/main/add-review/review";
-
+import CreateListScreen from "../screens/main/list/create-list";
+import AddPlaceToListScreen from "../screens/main/list/create-list/add-place";
+import AddFavoriteScreen from "../screens/main/profile/add-favorite";
+import EditFavoritesScreen from "../screens/main/profile/edit-favorites";
+import EditListsScreen from "../screens/main/profile/edit-lists";
+import ConnectionsScreen from "../screens/main/profile/connections";
 const AuthStack = createNativeStackNavigator();
 const MainTab = createBottomTabNavigator();
 const RootStack = createNativeStackNavigator();
 const AddReviewStack = createNativeStackNavigator();
 const ExploreStack = createNativeStackNavigator();
-
+const ListStack = createNativeStackNavigator();
+const HomeStack = createNativeStackNavigator();
+const ProfileStack = createNativeStackNavigator();
 const slideStackOptions = {
-  headerShown: false,
-  contentStyle: { backgroundColor: colors.background },
-  gestureEnabled: true,
-  fullScreenGestureEnabled: true,
-  animation: "slide_from_right",
-  animationTypeForReplace: "push",
+    headerShown: false,
+    contentStyle: { backgroundColor: colors.background },
+    gestureEnabled: true,
+    fullScreenGestureEnabled: true,
+    animation: "slide_from_right",
+    animationTypeForReplace: "push",
 };
-
-const commonStackOptions = {
-  headerShown: false,
-  contentStyle: { backgroundColor: colors.background },
-};
-
-const AddReviewModalFlow = () => (
-  <AddReviewStack.Navigator screenOptions={slideStackOptions}>
-    <AddReviewStack.Screen
-      name="AddReviewSearch"
-      component={AddReviewSearchScreen}
-    />
-    <AddReviewStack.Screen
-      name="AddReviewForm"
-      component={AddReviewFormScreen}
-    />
-  </AddReviewStack.Navigator>
-);
-
-const ExploreFlow = () => (
-  <ExploreStack.Navigator
-    screenOptions={slideStackOptions}
-    initialRouteName="ExploreHome"
-  >
-    <ExploreStack.Screen
-      name="ExploreHome"
-      component={ExploreScreen}
-      options={{ headerShown: false }}
-    />
-    <ExploreStack.Screen
-      name="Category"
-      component={CategoryScreen}
-      options={{ headerShown: false, title: "", headerShadowVisible: false }}
-    />
-    <ExploreStack.Screen
-      name="Search"
-      component={SearchScreen}
-      options={{
-        headerShown: true,
-        title: "Buscar",
+const AddReviewModalFlow = () => (<AddReviewStack.Navigator screenOptions={slideStackOptions}>
+    <AddReviewStack.Screen name="AddReviewSearch" component={AddReviewSearchScreen}/>
+    <AddReviewStack.Screen name="AddReviewForm" component={AddReviewFormScreen}/>
+  </AddReviewStack.Navigator>);
+const CreateListFlow = () => (<ListStack.Navigator screenOptions={{
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.textPrimary,
+        headerTitleAlign: "center",
         headerShadowVisible: false,
-      }}
-    />
-  </ExploreStack.Navigator>
-);
-
-const MainTabs = () => (
-  <MainTab.Navigator
-    screenOptions={{
-      headerShown: false,
-      tabBarShowLabel: false,
-      tabBarActiveTintColor: colors.primary,
-      tabBarInactiveTintColor: "#888",
-      tabBarStyle: {
-        position: "absolute",
-        backgroundColor: colors.surface,
-        borderTopWidth: 1,
-        borderTopColor: colors.divider,
-        height: 80,
-        paddingBottom: 10,
-      },
-    }}
-  >
-    <MainTab.Screen
-      name="Noma"
-      component={HomeScreen}
-      options={{
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="home-outline" size={size} color={color} />
-        ),
-      }}
-    />
-
-    <MainTab.Screen
-      name="ExploreTab"
-      component={ExploreFlow}
-      options={{
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="search-outline" size={size} color={color} />
-        ),
-      }}
-    />
-
-    <MainTab.Screen
-      name="AddDummyTab"
-      component={() => null}
-      options={{
-        tabBarButton: (props) => (
-          <TouchableOpacity {...props} style={{ top: -20 }}>
-            <Ionicons name="add-circle" size={70} color={colors.primary} />
-          </TouchableOpacity>
-        ),
-      }}
-      listeners={({ navigation }) => ({
-        tabPress: (e) => {
-          e.preventDefault();
-          navigation.navigate("AddReviewFlow");
+    }}>
+    <ListStack.Screen name="CreateListForm" component={CreateListScreen}/>
+    <ListStack.Screen name="AddPlaceSearch" component={AddPlaceToListScreen} options={{ headerShown: false, animation: "slide_from_right" }}/>
+  </ListStack.Navigator>);
+const HomeFlow = () => (<HomeStack.Navigator screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.textPrimary,
+        headerTitleAlign: "center",
+        headerShadowVisible: false,
+        animation: "slide_from_right",
+    }}>
+    <HomeStack.Screen name="HomeMain" component={HomeScreen} options={{ headerShown: false }}/>
+    <HomeStack.Screen name="PlaceDetail" component={PlaceDetailScreen} options={{ headerShown: false }}/>
+    <HomeStack.Screen name="PlaceAllReviews" component={AllReviewsScreen} options={{ headerShown: false }}/>
+    <HomeStack.Screen name="UserConnections" component={ConnectionsScreen} options={{ headerShown: false }}/>
+  </HomeStack.Navigator>);
+const ProfileFlow = () => (<ProfileStack.Navigator screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.textPrimary,
+        headerTitleAlign: "center",
+        headerShadowVisible: false,
+        animation: "slide_from_right",
+    }}>
+    <ProfileStack.Screen name="ProfileMain" component={ProfileScreen} options={{ headerShown: false }}/>
+    <ProfileStack.Screen name="PlaceDetail" component={PlaceDetailScreen} options={{ headerShown: false }}/>
+    <ProfileStack.Screen name="PlaceAllReviews" component={AllReviewsScreen} options={{ headerShown: false }}/>
+    <ProfileStack.Screen name="UserConnections" component={ConnectionsScreen} options={{ headerShown: false }}/>
+  </ProfileStack.Navigator>);
+const ExploreFlow = () => (<ExploreStack.Navigator initialRouteName="ExploreLanding" screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.textPrimary,
+        headerTitleAlign: "center",
+        headerShadowVisible: false,
+        headerTitleStyle: {
+            fontSize: 18,
+            fontWeight: "bold",
         },
-      })}
-    />
-
-    <MainTab.Screen
-      name="SavedTab"
-      component={SavedScreen}
-      options={{
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="bookmark-outline" size={size} color={color} />
-        ),
-      }}
-    />
-    <MainTab.Screen
-      name="ProfileTab"
-      component={ProfileScreen}
-      options={{
-        tabBarIcon: ({ color, size }) => (
-          <Ionicons name="person-outline" size={size} color={color} />
-        ),
-      }}
-    />
-  </MainTab.Navigator>
-);
-
-const AuthStackScreens = () => (
-  <AuthStack.Navigator
-    screenOptions={{
-      ...slideStackOptions,
-      headerShown: true,
-      headerStyle: { backgroundColor: colors.surface },
-      headerTintColor: colors.textPrimary,
-    }}
-  >
-    <AuthStack.Screen
-      name="Login"
-      component={LoginScreen}
-      options={{ headerShown: false }}
-    />
-    <AuthStack.Screen
-      name="Register"
-      component={RegisterScreen}
-      options={{ title: "Cadastro" }}
-    />
-    <AuthStack.Screen
-      name="Signin"
-      component={SigninScreen}
-      options={{ title: "Entrar" }}
-    />
-  </AuthStack.Navigator>
-);
-
-const AppNavigator = () => (
-  <NavigationContainer theme={AppTheme}>
-    <RootStack.Navigator
-      initialRouteName="Auth"
-      screenOptions={slideStackOptions}
-    >
-      <RootStack.Screen
-        name="Auth"
-        component={AuthStackScreens}
-        options={{ headerShown: false }}
-      />
-      <RootStack.Screen name="Main" component={MainTabs} />
-      <RootStack.Screen
-        name="PlaceDetail"
-        component={PlaceDetailScreen}
-        options={{ animation: "slide_from_right" }}
-      />
-      <RootStack.Screen
-        name="AddReviewFlow"
-        component={AddReviewModalFlow}
-        options={{
-          presentation: "modal",
-          animation:
-            Platform.OS === "ios" ? "slide_from_bottom" : "slide_from_bottom",
-        }}
-      />
+        animation: "slide_from_right",
+    }}>
+    <ExploreStack.Screen name="ExploreLanding" component={ExploreLandingScreen} options={{
+        headerShown: false,
+    }}/>
+    <ExploreStack.Screen name="ExploreCategories" component={ExploreCategoryScreen} options={{ title: "Explorar Lugares" }}/>
+    <ExploreStack.Screen name="ExplorePeople" component={ExplorePeopleScreen} options={({ navigation }) => ({
+        title: "Explorar Pessoas",
+        headerLeft: () => (<TouchableOpacity style={{ paddingHorizontal: 12 }} onPress={() => navigation.canGoBack()
+                ? navigation.goBack()
+                : navigation.navigate("ExploreLanding")}>
+            <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
+          </TouchableOpacity>),
+    })}/>
+    <ExploreStack.Screen name="PlaceDetail" component={PlaceDetailScreen} options={{ headerShown: false }}/>
+    <ExploreStack.Screen name="PlaceAllReviews" component={AllReviewsScreen} options={{ headerShown: false }}/>
+    <ExploreStack.Screen name="UserConnections" component={ConnectionsScreen} options={{ headerShown: false }}/>
+    <ExploreStack.Screen name="UserProfile" component={ProfileScreen} options={{ headerShown: false }}/>
+    <ExploreStack.Screen name="Category" component={CategoryScreen} options={({ route }) => ({
+        title: route.params?.categoryName || "Categoria",
+    })}/>
+    <ExploreStack.Screen name="Search" component={SearchScreen} options={{ title: "Buscar" }}/>
+  </ExploreStack.Navigator>);
+const MainTabs = () => (<MainTab.Navigator screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: "#fff",
+        tabBarInactiveTintColor: "#9ca6ba",
+        tabBarStyle: {
+            position: "absolute",
+            bottom: 25,
+            left: 20,
+            right: 20,
+            backgroundColor: "#1b1f27",
+            borderRadius: 20,
+            height: 70,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 5,
+            elevation: 5,
+            borderTopWidth: 0,
+        },
+        tabBarItemStyle: {
+            paddingTop: 5,
+            paddingBottom: 5,
+        },
+    }}>
+    <MainTab.Screen name="Home" component={HomeFlow} options={{
+        tabBarLabel: "Home",
+        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "home" : "home-outline"} size={size} color={color}/>),
+    }}/>
+    <MainTab.Screen name="Explore" component={ExploreFlow} options={{
+        tabBarLabel: "Buscar",
+        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "search" : "search-outline"} size={size} color={color}/>),
+    }}/>
+    <MainTab.Screen name="CheckIn" component={() => null} options={{
+        tabBarLabel: "Check-in",
+        tabBarIcon: ({ color, size }) => (<Ionicons name="add-outline" size={size + 4} color={color}/>),
+    }} listeners={({ navigation }) => ({
+        tabPress: (e) => {
+            e.preventDefault();
+            navigation.navigate("AddReviewFlow");
+        },
+    })}/>
+    <MainTab.Screen name="Saved" component={SavedScreen} options={{
+        tabBarLabel: "Salvos",
+        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "bookmark" : "bookmark-outline"} size={size} color={color}/>),
+    }}/>
+    <MainTab.Screen name="Profile" component={ProfileFlow} options={{
+        tabBarLabel: "Perfil",
+        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "person" : "person-outline"} size={size} color={color}/>),
+    }}/>
+  </MainTab.Navigator>);
+const AuthStackScreens = () => (<AuthStack.Navigator screenOptions={{
+        ...slideStackOptions,
+        headerShown: true,
+        headerStyle: { backgroundColor: colors.surface },
+        headerTintColor: colors.textPrimary,
+    }}>
+    <AuthStack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }}/>
+    <AuthStack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }}/>
+    <AuthStack.Screen name="Signin" component={SigninScreen} options={{ title: "Entrar" }}/>
+  </AuthStack.Navigator>);
+const AppNavigator = () => (<NavigationContainer theme={AppTheme}>
+    <RootStack.Navigator initialRouteName="Auth" screenOptions={slideStackOptions}>
+      <RootStack.Screen name="Auth" component={AuthStackScreens} options={{ headerShown: false }}/>
+      <RootStack.Screen name="Main" component={MainTabs}/>
+      <RootStack.Screen name="PlaceDetail" component={PlaceDetailScreen}/>
+      <RootStack.Screen name="PlaceAllReviews" component={AllReviewsScreen} options={{ headerShown: false }}/>
+      <RootStack.Screen name="ListDetail" component={ListDetailScreen} options={({ route }) => ({
+        headerShown: true,
+        title: route.params?.listName || "Lista",
+        headerShadowVisible: false,
+    })}/>
+      <RootStack.Screen name="AddReviewFlow" component={AddReviewModalFlow} options={{
+        presentation: "modal",
+        headerShown: false,
+    }}/>
+      <RootStack.Screen name="CreateListFlow" component={CreateListFlow} options={{
+        presentation: "modal",
+        headerShown: false,
+    }}/>
+      <RootStack.Screen name="AddFavoriteFlow" component={AddFavoriteScreen} options={{
+        presentation: "modal",
+        headerShown: false,
+    }}/>
+      <RootStack.Screen name="EditFavoritesScreen" component={EditFavoritesScreen} options={{
+        presentation: "modal",
+        headerShown: false,
+    }}/>
+      <RootStack.Screen name="EditListsScreen" component={EditListsScreen} options={{
+        presentation: "modal",
+        headerShown: false,
+    }}/>
+      <RootStack.Screen name="UserConnections" component={ConnectionsScreen} options={{ headerShown: false }}/>
     </RootStack.Navigator>
-  </NavigationContainer>
-);
-
+  </NavigationContainer>);
 export default AppNavigator;

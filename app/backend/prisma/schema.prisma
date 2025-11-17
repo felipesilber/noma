@@ -15,176 +15,218 @@ enum PriceLevel {
 }
 
 enum Weekday {
-  MON
-  TUE
-  WED
-  THU
-  FRI
-  SAT
+  MON 
+  TUE 
+  WED 
+  THU 
+  FRI 
+  SAT 
   SUN
 }
 
+enum ActivityType {
+  REVIEWED
+  SAVED
+  CHECKED_IN
+  CREATED_LIST
+}
+
+
 model User {
-  id             Int             @id @default(autoincrement())
-  firebaseUid    String          @unique
-  username       String?         @unique
-  email          String?         @unique
-  avatarUrl      String?
-  level          Int             @default(1)
-  createdAt      DateTime        @default(now())
-  reviews        Review[]
-  lists          List[]
-  savedPlaces    SavedPlace[]
-  favoritePlaces FavoritePlace[]
-  followers      Follow[]        @relation("Followers")
-  following      Follow[]        @relation("Following")
+  id              Int      @id @default(autoincrement())
+  firebaseUid     String   @unique
+  username        String?  @unique // Mantido como @handle
+  email           String?  @unique
+  avatarUrl       String?
+  createdAt       DateTime @default(now())
+
+  // Sistema de Gamificação "Noma"
+  nomaLevel       Int @default(1)
+  nomaCurrentXp   Int @default(0)
+  nomaNextLevelXp Int @default(100) // XP para o próximo nível
+
+  // Relações
+  reviews         Review[]
+  lists           List[]
+  savedPlaces     SavedPlace[]
+  favoritePlaces  FavoritePlace[]
+  activities      Activity[] // Relação com o novo feed de atividades
+  followers       Follow[]   @relation("Followers")
+  following       Follow[]   @relation("Following")
 }
 
 model Place {
-  id             Int                 @id @default(autoincrement())
-  name           String
-  description    String?
-  address        String
-  imageUrl       String?
-  siteUrl        String?
-  category       Category            @relation(fields: [categoryId], references: [id])
-  categoryId     Int
-  reviews        Review[]
-  savedPlaces    SavedPlace[]
+  id           Int      @id @default(autoincrement())
+  name         String
+  description  String?
+  address      String
+  imageUrl     String? // Imagem principal/capa
+  siteUrl      String?
+  phone        String?
+  latitude     Float
+  longitude    Float
+  priceInfo    String?  // Ex: "R$50 - R$80 por pessoa"
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relações
+  category     Category         @relation(fields: [categoryId], references: [id])
+  categoryId   Int
+  reviews      Review[]
+  savedPlaces  SavedPlace[]
   favoritePlaces FavoritePlace[]
-  listItems      ListItem[]
-  phone          String?
-  latitude       Float?
-  longitude      Float?
-  priceLevel     PriceLevel?
-  priceRange     String?
-  photos         Photo[]
-  tags           Tag[]
-  openingHours   PlaceOpeningHours?
-  createdAt      DateTime            @default(now())
-  updatedAt      DateTime            @updatedAt
+  listItems    ListItem[]
+  photos       Photo[]          // Galeria de fotos de clientes
+  tags         Tag[]            
+  openingHours OpeningHourRule[] // Novo modelo de horário de funcionamento
+  events       Event[]          // Relação com o novo modelo de eventos
+  activities   Activity[]
 }
 
-model Photo {
-  id        Int      @id @default(autoincrement())
-  url       String
-  place     Place    @relation(fields: [placeId], references: [id])
-  placeId   Int
-  createdAt DateTime @default(now())
+model Review {
+  id                Int      @id @default(autoincrement())
+  generalRating     Int
+  foodRating        Int
+  serviceRating     Int
+  environmentRating Int
+  comment           String?
+  pricePaid         Decimal? // Renomeado de 'price' para clareza
+  numberOfPeople    Int?     // Adicionado
+  createdAt         DateTime @default(now())
+
+  // Relações
+  user              User     @relation(fields: [userId], references: [id])
+  userId            Int
+  place             Place    @relation(fields: [placeId], references: [id])
+  placeId           Int
+  activity          Activity? // Link para o evento de feed
+}
+
+model Category {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  imageUrl String? // Adicionado para a tela de Busca
+
+  // Relações
+  places   Place[]
+}
+
+model List {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String?
+  imageUrl    String?    // Adicionado para o carrossel do perfil
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relações
+  user        User       @relation(fields: [userId], references: [id])
+  userId      Int
+  items       ListItem[]
+  activities  Activity[]
+
+  @@unique([userId, name])
 }
 
 model Tag {
   id     Int     @id @default(autoincrement())
   name   String  @unique
-  places Place[]
+  places Place[] 
 }
 
-model PlaceOpeningHours {
-  id              Int      @id @default(autoincrement())
-  place           Place    @relation(fields: [placeId], references: [id])
-  placeId         Int      @unique
-  statusNow       Boolean?
-  closesAt        String?
-  opensAt         String?
-  monday          String?
-  tuesday         String?
-  wednesday       String?
-  thursday        String?
-  friday          String?
-  saturday        String?
-  sunday          String?
-  mondayBlocks    Json?
-  tuesdayBlocks   Json?
-  wednesdayBlocks Json?
-  thursdayBlocks  Json?
-  fridayBlocks    Json?
-  saturdayBlocks  Json?
-  sundayBlocks    Json?
+// --- MODELOS REESTRUTURADOS E NOVOS ---
+
+// Modelo para Horário de Funcionamento (Muito mais flexível)
+model OpeningHourRule {
+  id        Int     @id @default(autoincrement())
+  dayOfWeek Weekday // Seg, Ter, Qua...
+  openTime  String  // Ex: "18:00"
+  closeTime String  // Ex: "00:00"
+
+  // Relação
+  place     Place   @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  placeId   Int
+}
+
+// Novo: Modelo para o Feed de Atividades de Amigos
+model Activity {
+  id        Int          @id @default(autoincrement())
+  type      ActivityType // REVIEWED, SAVED, etc.
+  createdAt DateTime     @default(now())
+
+  // Relações (quem fez a ação e sobre o que)
+  user      User         @relation(fields: [userId], references: [id])
+  userId    Int
+  place     Place?       @relation(fields: [placeId], references: [id])
+  placeId   Int?
+  review    Review?      @relation(fields: [reviewId], references: [id])
+  reviewId  Int?         @unique
+  list      List?        @relation(fields: [listId], references: [id])
+  listId    Int?
+}
+
+// Novo: Modelo para Promoções e Eventos
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  imageUrl    String
+  startDate   DateTime
+  endDate     DateTime
+
+  // Relação (onde o evento acontece)
+  place       Place    @relation(fields: [placeId], references: [id])
+  placeId     Int
+}
+
+
+// --- MODELOS DE RELAÇÃO (Muitos-para-Muitos e outros) ---
+// A maioria foi mantida, com pequenas melhorias.
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  url       String
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  placeId   Int
+  createdAt DateTime @default(now())
 }
 
 model SavedPlace {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
-  place     Place    @relation(fields: [placeId], references: [id])
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
   placeId   Int
   createdAt DateTime @default(now())
 
-  @@unique([userId, placeId])
-}
-
-model Category {
-  id     Int     @id @default(autoincrement())
-  name   String  @unique
-  emoji  String?  @db.Text
-  colorHex String?  @db.VarChar(9)
-  textColorHex String?  @db.VarChar(9)
-  places Place[]
-}
-
-model Review {
-  id        Int      @id @default(autoincrement())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int
-  place     Place    @relation(fields: [placeId], references: [id])
-  placeId   Int
-  generalRating    Int
-  foodRating       Int
-  serviceRating    Int
-  environmentRating Int
-  comment   String?
-  price     Decimal?
-  createdAt DateTime @default(now())
+  @@id([userId, placeId])
 }
 
 model Follow {
-  id         Int  @id @default(autoincrement())
-  follower   User @relation("Following", fields: [followerId], references: [id])
+  follower   User @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
   followerId Int
-  followed   User @relation("Followers", fields: [followedId], references: [id])
+  followed   User @relation("Followers", fields: [followedId], references: [id], onDelete: Cascade)
   followedId Int
 
-  @@unique([followerId, followedId])
-}
-
-model List {
-  id          Int        @id @default(autoincrement())
-  user        User       @relation(fields: [userId], references: [id])
-  userId      Int
-  name        String
-  description String?
-  items       ListItem[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  @@unique([userId, name])
-  @@index([userId])
+  @@id([followerId, followedId])
 }
 
 model ListItem {
-  id      Int      @id @default(autoincrement())
   list    List     @relation(fields: [listId], references: [id], onDelete: Cascade)
   listId  Int
-  place   Place    @relation(fields: [placeId], references: [id])
+  place   Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
   placeId Int
   order   Int?
   addedAt DateTime @default(now())
 
-  @@unique([listId, placeId])
-  @@index([listId])
+  @@id([listId, placeId])
 }
 
 model FavoritePlace {
-  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    Int
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
   placeId   Int
-  order     Int
   createdAt DateTime @default(now())
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  place Place @relation(fields: [placeId], references: [id])
-
-  @@unique([userId, placeId])
-  @@unique([userId, order])
-  @@index([userId])
+  @@id([userId, placeId])
 }

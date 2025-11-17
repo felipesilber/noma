@@ -1,50 +1,128 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet } from "react-native";
 import colors from "../../../theme/colors";
-
-const { width } = Dimensions.get("window");
-
-const styles = StyleSheet.create({
-  screenContainer: {
-    flex: 1,
-    backgroundColor: colors.surface,
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 32,
-  },
-  logoImage: {
-    width: 400,
-    height: 300,
-  },
-  createAccountButton: {
-    width: "100%",
-    backgroundColor: colors.primary,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  createAccountButtonText: {
-    color: colors.surface,
-    fontSize: 16,
-    fontFamily: "Nunito-Regular",
-  },
-  loginButton: {
-    width: "100%",
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    paddingVertical: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  loginButtonText: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    fontFamily: "Nunito-Regular",
-  },
+export default StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    background: {
+        flex: 1,
+        width: "100%",
+        height: "100%",
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: "rgba(0, 0, 0, 0.3)",
+    },
+    safeArea: {
+        flex: 1,
+        justifyContent: "flex-start",
+        paddingHorizontal: 24,
+        paddingVertical: 40,
+    },
+    contentContainer: {
+        flex: 1,
+        justifyContent: "flex-start",
+        paddingTop: 150,
+    },
+    header: {
+        alignItems: "center",
+        paddingBottom: 40,
+    },
+    logo: {
+        fontSize: 56,
+        color: colors.textPrimary,
+        letterSpacing: 0.5,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: colors.textPrimary,
+        marginTop: 8,
+        fontWeight: "400",
+    },
+    formContainer: {
+        width: "100%",
+        alignItems: "center",
+        paddingHorizontal: 20,
+    },
+    socialButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(255, 255, 255, 0.15)",
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        marginBottom: 12,
+        width: "100%",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+    },
+    googleIconContainer: {
+        marginRight: 12,
+        width: 20,
+        height: 20,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    facebookIconContainer: {
+        marginRight: 12,
+        width: 20,
+        height: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#1877F2",
+        borderRadius: 10,
+    },
+    socialButtonText: {
+        color: colors.textPrimary,
+        fontSize: 16,
+        fontWeight: "500",
+    },
+    separator: {
+        color: colors.textPrimary,
+        textAlign: "center",
+        marginVertical: 16,
+        fontSize: 14,
+        fontWeight: "400",
+    },
+    input: {
+        backgroundColor: "rgba(255, 255, 255, 0.15)",
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        color: colors.textPrimary,
+        fontSize: 16,
+        marginBottom: 12,
+        width: "100%",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+    },
+    loginButton: {
+        width: "100%",
+        backgroundColor: colors.primary,
+        paddingVertical: 16,
+        paddingHorizontal: 20,
+        borderRadius: 12,
+        alignItems: "center",
+        marginTop: 8,
+    },
+    loginButtonText: {
+        color: colors.textPrimary,
+        fontSize: 16,
+        fontWeight: "700",
+    },
+    footer: {
+        alignItems: "center",
+        marginTop: 20,
+    },
+    footerText: {
+        color: colors.textPrimary,
+        fontSize: 14,
+        fontWeight: "400",
+    },
+    footerLink: {
+        color: colors.primary,
+        fontSize: 14,
+        fontWeight: "600",
+    },
 });
-
-export default styles;

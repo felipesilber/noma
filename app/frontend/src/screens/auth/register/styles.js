@@ -1,101 +1,138 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import colors from "../../../theme/colors";
-
 export default StyleSheet.create({
-  container: { flex: 1 },
-
-  progressWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingTop: 40,
-    paddingBottom: 16,
-    paddingHorizontal: 24,
-  },
-  progressDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.divider,
-  },
-  progressBar: {
-    flex: 1,
-    height: 2,
-    marginHorizontal: 8,
-    backgroundColor: colors.divider,
-  },
-  progressActive: {
-    backgroundColor: colors.primary,
-  },
-
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 24,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 24,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-
-  input: {
-    color: colors.textPrimary,
-    backgroundColor: colors.surface,
-    borderColor: colors.divider,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    height: 52,
-    marginBottom: 12,
-  },
-
-  toggle: {
-    position: "absolute",
-    right: 12,
-    top: 10,
-    height: 32,
-    justifyContent: "center",
-  },
-  toggleText: { color: colors.textSecondary, fontSize: 14 },
-
-  error: { color: colors.error, marginTop: 4, marginBottom: 6 },
-
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 12,
-    gap: 12,
-  },
-
-  secondaryBtn: {
-    height: 52,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.divider,
-    alignItems: "center",
-    justifyContent: "center",
-    flexGrow: 1,
-    backgroundColor: colors.surface,
-  },
-  secondaryText: { color: colors.textSecondary, fontWeight: "600" },
-
-  primaryBtn: {
-    height: 52,
-    paddingHorizontal: 18,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-    justifyContent: "center",
-    flexGrow: 1,
-  },
-  primaryText: { color: colors.surface, fontWeight: "700" },
-
-  legal: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    textAlign: "center",
-    marginTop: 18,
-  },
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+    },
+    header: {
+        paddingTop: Platform.OS === "ios" ? 50 : 20,
+        paddingHorizontal: 16,
+        paddingBottom: 16,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    backButton: {
+        padding: 4,
+    },
+    progressContainer: {
+        paddingHorizontal: 24,
+        paddingBottom: 24,
+    },
+    progressStepText: {
+        color: colors.textPrimary,
+        fontSize: 12,
+        marginBottom: 8,
+    },
+    progressBarBackground: {
+        height: 6,
+        backgroundColor: colors.surface,
+        borderRadius: 3,
+        overflow: "hidden",
+    },
+    progressBarFill: {
+        height: "100%",
+        backgroundColor: colors.primary,
+        borderRadius: 3,
+    },
+    content: {
+        flex: 1,
+        paddingHorizontal: 24,
+        paddingTop: 24,
+    },
+    title: {
+        color: colors.textPrimary,
+        fontSize: 28,
+    },
+    subtitle: {
+        color: colors.textSecondary,
+        fontSize: 16,
+        marginTop: 8,
+        marginBottom: 24,
+    },
+    label: {
+        color: colors.textSecondary,
+        fontSize: 14,
+        marginBottom: 8,
+    },
+    inputContainer: {
+        position: "relative",
+        justifyContent: "center",
+    },
+    input: {
+        color: colors.textPrimary,
+        backgroundColor: colors.surface,
+        borderRadius: 10,
+        paddingHorizontal: 16,
+        height: 52,
+        fontSize: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: colors.divider,
+    },
+    inputWithIcon: {
+        color: colors.textPrimary,
+        backgroundColor: colors.surface,
+        borderRadius: 10,
+        paddingLeft: 44,
+        paddingRight: 16,
+        height: 52,
+        fontSize: 16,
+        marginBottom: 12,
+        borderWidth: 1,
+        borderColor: colors.divider,
+    },
+    inputIcon: {
+        position: "absolute",
+        left: 12,
+        zIndex: 1,
+    },
+    toggleIcon: {
+        position: "absolute",
+        right: 12,
+        top: 12,
+        height: 32,
+        justifyContent: "center",
+    },
+    error: {
+        color: colors.error,
+        marginTop: -4,
+        marginBottom: 8,
+        fontSize: 14,
+    },
+    footer: {
+        flexDirection: "row",
+        padding: 24,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: colors.divider,
+        backgroundColor: colors.background,
+        gap: 12,
+    },
+    secondaryBtn: {
+        height: 52,
+        paddingHorizontal: 18,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        flexGrow: 1,
+        backgroundColor: colors.surface,
+    },
+    secondaryText: {
+        color: colors.textPrimary,
+        fontSize: 16,
+    },
+    primaryBtn: {
+        height: 52,
+        paddingHorizontal: 18,
+        borderRadius: 12,
+        backgroundColor: colors.primary,
+        alignItems: "center",
+        justifyContent: "center",
+        flexGrow: 1,
+    },
+    primaryText: {
+        color: colors.textPrimary,
+        fontSize: 16,
+    },
 });

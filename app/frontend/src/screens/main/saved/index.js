@@ -1,150 +1,116 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  FlatList,
-  Image,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, TouchableOpacity, FlatList, Image, ActivityIndicator, StyleSheet, Alert, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
-
-const SavedScreen = ({ navigation }) => {
-  const [savedPlaces, setSavedPlaces] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchSavedPlaces = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await api.get("/saved-places");
-      setSavedPlaces(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(
-        "Erro ao buscar lugares salvos:",
-        err?.response?.data || err?.message
-      );
-      setError(
-        "Não foi possível carregar os lugares salvos. Verifique sua conexão ou tente novamente."
-      );
-      Alert.alert("Erro", "Não foi possível carregar os lugares salvos.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    const unsub = navigation.addListener("focus", fetchSavedPlaces);
-    return unsub;
-  }, [navigation, fetchSavedPlaces]);
-
-  const handleRemovePlace = async (placeId) => {
-    try {
-      setSavedPlaces((curr) => curr.filter((p) => p.id !== placeId));
-      await api.delete(`/saved-places/${placeId}`);
-    } catch (err) {
-      console.error(
-        "Erro ao remover lugar:",
-        err?.response?.data || err?.message
-      );
-      Alert.alert("Erro", "Não foi possível remover o lugar.");
-      fetchSavedPlaces();
-    }
-  };
-
-  const renderSavedPlaceItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.placeCard}
-      activeOpacity={0.85}
-      onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}
-    >
-      <Image
-        source={{
-          uri:
-            item.image ||
-            "https://via.placeholder.com/150/D9D9D9/000000?text=Sem+Foto",
-        }}
-        style={styles.placeImage}
-      />
-      <View style={styles.placeInfo}>
-        <Text style={styles.placeName}>{item.name || "Nome Indisponível"}</Text>
-        <Text style={styles.placeAddress}>
-          {item.address || "Endereço Indisponível"}
-        </Text>
-      </View>
-      <TouchableOpacity
-        onPress={() => handleRemovePlace(item.id)}
-        style={styles.removeButton}
-      >
-        <Ionicons name="bookmark" size={22} color={colors.primary} />
-      </TouchableOpacity>
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import AppText from "../../../components/text";
+const SavedPlaceCard = ({ item, onPress, onRemove }) => (<View style={styles.cardContainer}>
+    <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
+      <Image source={{
+        uri: item.image ||
+            "https://via.placeholder.com/200/D9D9D9/000000?text=Sem+Foto",
+    }} style={styles.cardImage}/>
     </TouchableOpacity>
-  );
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Meus Salvos</Text>
-      </View>
+    <TouchableOpacity style={styles.removeButton} onPress={onRemove}>
+      <Ionicons name="bookmark" size={18} color="#fff"/>
+    </TouchableOpacity>
 
-      {loading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-          <Text style={styles.loadingText}>Carregando lugares...</Text>
-        </View>
-      )}
-
-      {error && !loading && (
-        <View style={styles.errorContainer}>
-          <Ionicons
-            name="alert-circle-outline"
-            size={46}
-            color={colors.error}
-          />
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity onPress={fetchSavedPlaces} activeOpacity={0.85}>
-            <Text style={styles.retryButtonText}>Tentar Novamente</Text>
+    <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
+      <AppText style={styles.cardName}>
+        {item.name || "Nome Indisponível"}
+      </AppText>
+    </TouchableOpacity>
+  </View>);
+const SavedScreen = ({ navigation }) => {
+    const tabBarHeight = useBottomTabBarHeight();
+    const PADDING_BOTTOM = tabBarHeight + 25;
+    const [savedPlaces, setSavedPlaces] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const fetchSavedPlaces = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await api.get("/saved-places");
+            const mappedPlaces = response.data.map((place) => ({
+                id: place.id,
+                name: place.name,
+                image: place.image,
+            }));
+            setSavedPlaces(mappedPlaces);
+        }
+        catch (err) {
+            console.error("Erro ao buscar lugares salvos:", err);
+            setError("Não foi possível carregar seus lugares salvos.");
+        }
+        finally {
+            setLoading(false);
+        }
+    }, []);
+    useEffect(() => {
+        const unsubscribe = navigation.addListener("focus", () => {
+            fetchSavedPlaces();
+        });
+        return unsubscribe;
+    }, [navigation, fetchSavedPlaces]);
+    const handleRemovePlace = async (placeId) => {
+        try {
+            setSavedPlaces((prevPlaces) => prevPlaces.filter((place) => place.id !== placeId));
+            await api.delete(`/saved-places/${placeId}`);
+        }
+        catch (err) {
+            console.error("Erro ao remover lugar salvo:", err);
+            Alert.alert("Erro", "Não foi possível remover o item. Tente novamente.");
+            fetchSavedPlaces();
+        }
+    };
+    const renderContent = () => {
+        if (loading) {
+            return (<View style={styles.messageContainer}>
+          <ActivityIndicator size="large" color={colors.primary}/>
+        </View>);
+        }
+        if (error) {
+            return (<View style={styles.messageContainer}>
+          <AppText style={styles.messageText}>{error}</AppText>
+          <TouchableOpacity onPress={fetchSavedPlaces} style={styles.retryButton}>
+            <AppText weight="bold" style={styles.retryButtonText}>
+              Tentar Novamente
+            </AppText>
           </TouchableOpacity>
-        </View>
-      )}
-
-      {!loading && !error && savedPlaces.length > 0 ? (
-        <FlatList
-          data={savedPlaces}
-          renderItem={renderSavedPlaceItem}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
-      ) : (
-        !loading &&
-        !error && (
-          <View style={styles.emptyStateContainer}>
-            <Ionicons
-              name="bookmark-outline"
-              size={80}
-              color={colors.textSecondary}
-            />
-            <Text style={styles.emptyStateText}>Nenhum lugar salvo ainda.</Text>
-            <Text style={styles.emptyStateSubText}>
-              Comece a explorar e adicione seus lugares favoritos!
-            </Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate("ExploreTab")}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.exploreButtonText}>Explorar Agora</Text>
-            </TouchableOpacity>
-          </View>
-        )
-      )}
-    </View>
-  );
+        </View>);
+        }
+        if (savedPlaces.length === 0) {
+            return (<View style={styles.messageContainer}>
+          <Ionicons name="bookmark-outline" size={60} color={colors.textSecondary}/>
+          <AppText weight="bold" style={styles.messageText}>
+            Você ainda não salvou nenhum lugar.
+          </AppText>
+          <AppText style={styles.messageSubtext}>
+            Clique no ícone de salvar nos lugares que você gostar!
+          </AppText>
+        </View>);
+        }
+        return (<FlatList data={savedPlaces} renderItem={({ item }) => (<SavedPlaceCard item={item} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })} onRemove={() => handleRemovePlace(item.id)}/>)} keyExtractor={(item) => String(item.id)} numColumns={2} showsVerticalScrollIndicator={false} contentContainerStyle={[
+                styles.listContent,
+                { paddingBottom: PADDING_BOTTOM },
+            ]} columnWrapperStyle={{ justifyContent: "space-between" }} ListHeaderComponent={<AppText weight="bold" style={styles.listTitle}>
+            Todos os salvos
+          </AppText>}/>);
+    };
+    return (<View style={styles.container}>
+      <View style={styles.header}>
+        <AppText weight="bold" style={styles.headerTitle}>
+          Salvos
+        </AppText>
+        <TouchableOpacity style={styles.headerRightIcon}>
+          <Ionicons name="filter" size={24} color={"#fff"}/>
+        </TouchableOpacity>
+      </View>
+      {renderContent()}
+    </View>);
 };
-
 export default SavedScreen;
