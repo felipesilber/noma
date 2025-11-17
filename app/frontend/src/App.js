@@ -1,9 +1,10 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { StatusBar, Platform, View, StyleSheet, Text } from "react-native";
+import { StatusBar, Platform, View, StyleSheet, Text, TouchableWithoutFeedback, Keyboard } from "react-native";
 import AppNavigator from "./navigation";
 import FlashMessage from "react-native-flash-message";
 import colors from "./theme/colors";
 import * as Font from "expo-font";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as SplashScreen from "expo-splash-screen";
 SplashScreen.preventAutoHideAsync();
 const App = () => {
@@ -33,11 +34,15 @@ const App = () => {
     if (!appIsReady) {
         return null;
     }
-    return (<View style={styles.root} onLayout={onLayoutRootView}>
-      <StatusBar barStyle="dark-content" backgroundColor={colors.background}/>
-      <AppNavigator />
-      <FlashMessage position="top" statusBarHeight={Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0}/>
-    </View>);
+    return (<SafeAreaProvider>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.root} onLayout={onLayoutRootView}>
+          <StatusBar barStyle="light-content" backgroundColor={colors.background}/>
+          <AppNavigator />
+          <FlashMessage position="top" statusBarHeight={Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0}/>
+        </View>
+      </TouchableWithoutFeedback>
+    </SafeAreaProvider>);
 };
 const styles = StyleSheet.create({
     root: {

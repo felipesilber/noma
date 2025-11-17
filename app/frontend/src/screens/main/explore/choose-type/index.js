@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import AppText from "../../../../components/text";
@@ -20,7 +21,7 @@ const ExploreLandingScreen = ({ navigation }) => {
     const handleExplorePeople = () => {
         navigation.navigate("ExplorePeople");
     };
-    return (<View style={styles.container}>
+    return (<SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.header}>
         <AppText weight="bold" style={styles.headerTitle}>
           Explorar
@@ -33,6 +34,6 @@ const ExploreLandingScreen = ({ navigation }) => {
 
       <ExploreCard imageSource={require("../../../../../assets/images/explore-people.png")} title="Explorar Pessoas" subtitle="Conecte-se com outros entusiastas de comida e bebida." onPress={handleExplorePeople}/>
       </ScrollView>
-    </View>);
+    </SafeAreaView>);
 };
 export default ExploreLandingScreen;

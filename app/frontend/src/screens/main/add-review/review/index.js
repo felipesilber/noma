@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, } from "react-native";
+import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import moment from "moment";
@@ -35,6 +36,8 @@ const AddReviewFormScreen = ({ route, navigation }) => {
     const [numberOfPeople, setNumberOfPeople] = useState("");
     const [reviewText, setReviewText] = useState("");
     const [currentDate, setCurrentDate] = useState("");
+    const [visitDate, setVisitDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     useEffect(() => {
         navigation.setOptions({
@@ -54,9 +57,23 @@ const AddReviewFormScreen = ({ route, navigation }) => {
     }, [navigation]);
     useEffect(() => {
         moment.locale("pt-br");
-        const today = moment();
-        setCurrentDate(today.format("DD [de] MMMM [de] YYYY"));
-    }, []);
+        setCurrentDate(moment(visitDate).format("DD [de] MMMM [de] YYYY"));
+    }, [visitDate]);
+    const openDatePicker = () => setShowDatePicker(true);
+    const onChangeDate = (event, selectedDate) => {
+        // Android fires its own modal; close on selection or dismissal
+        if (Platform.OS === "android") {
+            if (event.type === "set" && selectedDate) {
+                setVisitDate(selectedDate);
+            }
+            setShowDatePicker(false);
+            return;
+        }
+        // iOS updates live; keep modal open until user confirma
+        if (selectedDate) {
+            setVisitDate(selectedDate);
+        }
+    };
     const handlePublish = () => {
         if (overallRating === 0) {
             showErrorNotification("Atenção", "Dê uma nota geral para o lugar.", {
@@ -105,10 +122,25 @@ const AddReviewFormScreen = ({ route, navigation }) => {
             <TextInput style={styles.inputField} placeholder="Nº de Pessoas" placeholderTextColor="#C8C8C8" keyboardType="numeric"/>
           </View>
 
-          <View style={styles.dateInputContainer}>
+          <TouchableOpacity style={styles.dateInputContainer} onPress={openDatePicker} activeOpacity={0.8}>
             <Text style={styles.dateText}>{currentDate}</Text>
             <Ionicons name="calendar-outline" size={24} color={colors.textSecondary}/>
-          </View>
+          </TouchableOpacity>
+          {Platform.OS === "ios" ? (<Modal visible={showDatePicker} transparent animationType="fade" onRequestClose={() => setShowDatePicker(false)}>
+              <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" }}>
+                <View style={{ backgroundColor: "#1b1f27", paddingTop: 12, paddingBottom: 8, borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, marginBottom: 8 }}>
+                    <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                      <Text style={{ color: colors.textSecondary, fontSize: 16 }}>Cancelar</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                      <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>Concluir</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <DateTimePicker value={visitDate} mode="date" display="spinner" onChange={onChangeDate} maximumDate={new Date()} themeVariant="dark" textColor="#FFFFFF"/>
+                </View>
+              </View>
+            </Modal>) : (showDatePicker && (<DateTimePicker value={visitDate} mode="date" display="default" onChange={onChangeDate} maximumDate={new Date()}/>))} 
 
           <TextInput style={styles.experienceInput} placeholder="Sua Experiência" placeholderTextColor="#C8C8C8" multiline textAlignVertical="top"/>
         </View>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, TouchableOpacity, FlatList, Image, ActivityIndicator, StyleSheet, Alert, } from "react-native";
+import { View, TouchableOpacity, FlatList, Image, ActivityIndicator, StyleSheet, Alert, RefreshControl, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
@@ -30,9 +31,12 @@ const SavedScreen = ({ navigation }) => {
     const [savedPlaces, setSavedPlaces] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
     const fetchSavedPlaces = useCallback(async () => {
         try {
-            setLoading(true);
+            if (!refreshing) {
+                setLoading(true);
+            }
             setError(null);
             const response = await api.get("/saved-places");
             const mappedPlaces = response.data.map((place) => ({
@@ -48,6 +52,7 @@ const SavedScreen = ({ navigation }) => {
         }
         finally {
             setLoading(false);
+            setRefreshing(false);
         }
     }, []);
     useEffect(() => {
@@ -94,14 +99,17 @@ const SavedScreen = ({ navigation }) => {
           </AppText>
         </View>);
         }
-        return (<FlatList data={savedPlaces} renderItem={({ item }) => (<SavedPlaceCard item={item} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })} onRemove={() => handleRemovePlace(item.id)}/>)} keyExtractor={(item) => String(item.id)} numColumns={2} showsVerticalScrollIndicator={false} contentContainerStyle={[
+        return (<FlatList data={savedPlaces} renderItem={({ item }) => (<SavedPlaceCard item={item} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })} onRemove={() => handleRemovePlace(item.id)}/>)} keyExtractor={(item) => String(item.id)} numColumns={2} showsVerticalScrollIndicator={false} refreshing={refreshing} onRefresh={() => {
+                setRefreshing(true);
+                fetchSavedPlaces();
+            }} contentContainerStyle={[
                 styles.listContent,
                 { paddingBottom: PADDING_BOTTOM },
             ]} columnWrapperStyle={{ justifyContent: "space-between" }} ListHeaderComponent={<AppText weight="bold" style={styles.listTitle}>
             Todos os salvos
           </AppText>}/>);
     };
-    return (<View style={styles.container}>
+    return (<SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.header}>
         <AppText weight="bold" style={styles.headerTitle}>
           Salvos
@@ -111,6 +119,6 @@ const SavedScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       {renderContent()}
-    </View>);
+    </SafeAreaView>);
 };
 export default SavedScreen;

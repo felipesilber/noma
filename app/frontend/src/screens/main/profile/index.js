@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from "react";
-import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, Alert, } from "react-native";
+import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, Alert, RefreshControl, } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
@@ -62,9 +63,12 @@ const ProfileScreen = ({ navigation, route }) => {
     const [updatingFollow, setUpdatingFollow] = useState(false);
     const viewedUserId = route?.params?.userId ?? null;
     const isOwnProfile = !viewedUserId;
+    const [refreshing, setRefreshing] = useState(false);
     const fetchProfile = useCallback(async () => {
         try {
-            setLoading(true);
+            if (!refreshing) {
+                setLoading(true);
+            }
             const endpoint = viewedUserId
                 ? `profile/${viewedUserId}`
                 : "profile/me";
@@ -80,8 +84,9 @@ const ProfileScreen = ({ navigation, route }) => {
         }
         finally {
             setLoading(false);
+            setRefreshing(false);
         }
-    }, [viewedUserId]);
+    }, [viewedUserId, refreshing]);
     useFocusEffect(useCallback(() => {
         fetchProfile();
     }, [fetchProfile]));
@@ -186,7 +191,7 @@ const ProfileScreen = ({ navigation, route }) => {
         : "0";
     const favoritePlaces = carousels?.favoritePlaces || [];
     const userLists = carousels?.userLists || [];
-    return (<View style={styles.container}>
+    return (<SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.header}>
         {!isOwnProfile && (<TouchableOpacity style={styles.headerLeftIcon} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
@@ -211,7 +216,10 @@ const ProfileScreen = ({ navigation, route }) => {
           </View>
         </>)}
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }}>
+      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => {
+                setRefreshing(true);
+                fetchProfile();
+            }} tintColor={colors.textSecondary}/> } contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }}>
         <View style={styles.profileInfoContainer}>
           <TouchableOpacity>
             <Image source={{
@@ -312,6 +320,6 @@ const ProfileScreen = ({ navigation, route }) => {
 
         <View style={{ height: 40 }}/>
       </ScrollView>
-    </View>);
+    </SafeAreaView>);
 };
 export default ProfileScreen;

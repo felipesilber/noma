@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator, FlatList, } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator, FlatList, RefreshControl, } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
@@ -203,12 +204,22 @@ const ExplorePeopleScreen = ({ navigation }) => {
         }
         return (<FlatList data={searchResults} keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => (<UserCard user={item} onFollowToggle={handleFollowToggle} onPress={handleOpenProfile}/>)}/>);
     };
-    return (<ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+    return (<SafeAreaView edges={["top"]} style={{ flex: 1 }}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={loadingPopular || loadingActive || isSearching} onRefresh={() => {
+                if (searchText.trim().length >= 2) {
+                    setIsSearching(true);
+                    fetchUsers(searchText.trim()).finally(() => setIsSearching(false));
+                }
+                else {
+                    fetchInitialData();
+                }
+            }} tintColor={colors.textSecondary}/>}>
       <View style={styles.searchBarContainer}>
         <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={styles.searchIcon}/>
         <TextInput style={styles.searchInput} placeholder="Buscar por nome de usuário" placeholderTextColor={colors.textSecondary} value={searchText} onChangeText={setSearchText} autoFocus={false}/>
       </View>
       {renderContent()}
-    </ScrollView>);
+      </ScrollView>
+    </SafeAreaView>);
 };
 export default ExplorePeopleScreen;

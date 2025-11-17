@@ -35,6 +35,7 @@ const CategoryScreen = ({ route, navigation }) => {
     const [activeTab, setActiveTab] = useState("popular");
     const [places, setPlaces] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
     useEffect(() => {
         navigation.setOptions({
@@ -55,7 +56,9 @@ const CategoryScreen = ({ route, navigation }) => {
         });
     }, [navigation, categoryName]);
     const fetchPlaces = useCallback(async (tabKey) => {
-        setLoading(true);
+        if (!refreshing) {
+            setLoading(true);
+        }
         setError(null);
         try {
             let resp;
@@ -88,8 +91,9 @@ const CategoryScreen = ({ route, navigation }) => {
         }
         finally {
             setLoading(false);
+            setRefreshing(false);
         }
-    }, []);
+    }, [refreshing]);
     useEffect(() => {
         fetchPlaces(activeTab);
     }, [activeTab, fetchPlaces]);
@@ -100,7 +104,10 @@ const CategoryScreen = ({ route, navigation }) => {
         if (error) {
             return <Text style={styles.errorText}>{error}</Text>;
         }
-        return (<FlatList data={places} keyExtractor={(item) => String(item.id)} renderItem={({ item }) => (<PlaceCard item={item} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>)} ListHeaderComponent={<Text style={styles.listTitle}>
+        return (<FlatList data={places} keyExtractor={(item) => String(item.id)} renderItem={({ item }) => (<PlaceCard item={item} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>)} refreshing={refreshing} onRefresh={() => {
+                setRefreshing(true);
+                fetchPlaces(activeTab);
+            }} ListHeaderComponent={<Text style={styles.listTitle}>
             {tabLabelMap[activeTab] || "Resultados"}
           </Text>} contentContainerStyle={styles.listContent}/>);
     };

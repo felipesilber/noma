@@ -8,14 +8,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.background || "#F8F8F8",
-        paddingTop: 15,
+        paddingTop: 4,
     },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         paddingHorizontal: PADDING_HORIZONTAL,
-        marginBottom: 24,
+        marginBottom: 12,
     },
     headerTitle: {
         fontSize: 18,

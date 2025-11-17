@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, ScrollView, Image, ActivityIndicator, StyleSheet, } from "react-native";
+import { View, TouchableOpacity, ScrollView, Image, ActivityIndicator, StyleSheet, RefreshControl, } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
@@ -88,11 +89,14 @@ const HomeScreen = ({ navigation }) => {
     const tabBarHeight = useBottomTabBarHeight();
     const PADDING_BOTTOM = tabBarHeight + 25;
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
     const [feedData, setFeedData] = useState(null);
     const fetchHomeFeed = async () => {
         try {
-            setLoading(true);
+            if (!refreshing) {
+                setLoading(true);
+            }
             const response = await api.get("/feed/home");
             setFeedData(response.data);
             setError(null);
@@ -103,6 +107,7 @@ const HomeScreen = ({ navigation }) => {
         }
         finally {
             setLoading(false);
+            setRefreshing(false);
         }
     };
     useEffect(() => {
@@ -123,7 +128,7 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>);
     }
-    return (<View style={styles.container}>
+    return (<SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.header}>
         <AppText weight="bold" style={styles.headerTitle}>
           Início
@@ -132,7 +137,10 @@ const HomeScreen = ({ navigation }) => {
           <Ionicons name="search" size={24} color={colors.textPrimary}/>
         </TouchableOpacity>
       </View>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{
+      <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => {
+                setRefreshing(true);
+                fetchHomeFeed();
+            }} tintColor={colors.textSecondary}/> } contentContainerStyle={{
             paddingBottom: PADDING_BOTTOM,
         }}>
         {feedData?.featuredPlaces?.length > 0 && (<Section title="Destaques">
@@ -179,6 +187,6 @@ const HomeScreen = ({ navigation }) => {
             </View>
           </Section>)}
       </ScrollView>
-    </View>);
+    </SafeAreaView>);
 };
 export default HomeScreen;

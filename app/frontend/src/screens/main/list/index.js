@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, } from "react-native";
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, RefreshControl, } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import styles from "./styles";
 import colors from "../../../theme/colors";
@@ -25,6 +25,7 @@ const ListDetailScreen = () => {
     const [listData, setListData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
     const fetchListDetails = useCallback(async () => {
         if (!listId) {
             setError("ID da lista não fornecido.");
@@ -32,7 +33,9 @@ const ListDetailScreen = () => {
             return;
         }
         try {
-            setLoading(true);
+            if (!refreshing) {
+                setLoading(true);
+            }
             setError(null);
             const response = await api.get(`/lists/${listId}`);
             setListData(response.data);
@@ -43,8 +46,9 @@ const ListDetailScreen = () => {
         }
         finally {
             setLoading(false);
+            setRefreshing(false);
         }
-    }, [listId]);
+    }, [listId, refreshing]);
     useEffect(() => {
         navigation.setOptions({ title: listName || "Lista" });
         fetchListDetails();
@@ -63,7 +67,10 @@ const ListDetailScreen = () => {
     }
     const updatedAt = moment(listData.updatedAt).locale("pt-br").fromNow();
     const placeCount = listData.items?.length || 0;
-    return (<ScrollView style={styles.container}>
+    return (<ScrollView style={styles.container} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => {
+                setRefreshing(true);
+                fetchListDetails();
+            }} tintColor={colors.textSecondary}/> }>
       <View style={styles.headerContainer}>
         <Image source={{ uri: listData.imageUrl }} style={styles.listImage}/>
         <Text style={styles.listName}>{listData.name}</Text>

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, ActivityIndicator, StyleSheet, Platform, } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, ActivityIndicator, StyleSheet, Platform, RefreshControl, } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
@@ -78,6 +78,7 @@ const PlaceDetailScreen = ({ route, navigation }) => {
     const [place, setPlace] = useState(null);
     const [ratingsData, setRatingsData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState(null);
     const [isSaved, setIsSaved] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -90,7 +91,9 @@ const PlaceDetailScreen = ({ route, navigation }) => {
             setLoading(false);
             return;
         }
-        setLoading(true);
+        if (!refreshing) {
+            setLoading(true);
+        }
         setError(null);
         try {
             const [detailsResponse, ratingsResponse] = await Promise.all([
@@ -110,8 +113,9 @@ const PlaceDetailScreen = ({ route, navigation }) => {
         }
         finally {
             setLoading(false);
+            setRefreshing(false);
         }
-    }, [placeId]);
+    }, [placeId, refreshing]);
     useEffect(() => {
         fetchData();
     }, [fetchData]);
@@ -182,7 +186,10 @@ const PlaceDetailScreen = ({ route, navigation }) => {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => {
+                setRefreshing(true);
+                fetchData();
+            }} tintColor={colors.textSecondary}/> }>
         <Image source={{ uri: headerImage }} style={styles.headerImage}/>
 
         <View style={styles.contentContainer}>

@@ -1,9 +1,10 @@
 import React from "react";
-import { Platform, TouchableOpacity, Text } from "react-native";
+import { Platform, TouchableOpacity, Text, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import colors from "../theme/colors";
 import AppTheme from "../theme/theme";
 import LoginScreen from "../screens/auth/login";
@@ -86,6 +87,7 @@ const ExploreFlow = () => (<ExploreStack.Navigator initialRouteName="ExploreLand
         headerTintColor: colors.textPrimary,
         headerTitleAlign: "center",
         headerShadowVisible: false,
+        headerBackTitleVisible: false,
         headerTitleStyle: {
             fontSize: 18,
             fontWeight: "bold",
@@ -95,7 +97,7 @@ const ExploreFlow = () => (<ExploreStack.Navigator initialRouteName="ExploreLand
     <ExploreStack.Screen name="ExploreLanding" component={ExploreLandingScreen} options={{
         headerShown: false,
     }}/>
-    <ExploreStack.Screen name="ExploreCategories" component={ExploreCategoryScreen} options={{ title: "Explorar Lugares" }}/>
+    <ExploreStack.Screen name="ExploreCategories" component={ExploreCategoryScreen} options={{ title: "Explorar Lugares", headerBackTitleVisible: false }}/>
     <ExploreStack.Screen name="ExplorePeople" component={ExplorePeopleScreen} options={({ navigation }) => ({
         title: "Explorar Pessoas",
         headerLeft: () => (<TouchableOpacity style={{ paddingHorizontal: 12 }} onPress={() => navigation.canGoBack()
@@ -113,41 +115,65 @@ const ExploreFlow = () => (<ExploreStack.Navigator initialRouteName="ExploreLand
     })}/>
     <ExploreStack.Screen name="Search" component={SearchScreen} options={{ title: "Buscar" }}/>
   </ExploreStack.Navigator>);
-const MainTabs = () => (<MainTab.Navigator screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#fff",
-        tabBarInactiveTintColor: "#9ca6ba",
-        tabBarStyle: {
-            position: "absolute",
-            bottom: 25,
-            left: 20,
-            right: 20,
-            backgroundColor: "#1b1f27",
-            borderRadius: 20,
-            height: 70,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 5,
-            elevation: 5,
-            borderTopWidth: 0,
-        },
-        tabBarItemStyle: {
-            paddingTop: 5,
-            paddingBottom: 5,
-        },
-    }}>
+const MainTabs = () => {
+    const insets = useSafeAreaInsets();
+    const baseTabHeight = 44;
+    const extra = Math.max(insets.bottom, 0);
+    const computedHeight = baseTabHeight + extra;
+    const halfExtra = Math.round(extra / 2);
+    return (<MainTab.Navigator screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: "#fff",
+            tabBarInactiveTintColor: "#9ca6ba",
+            tabBarHideOnKeyboard: true,
+            tabBarStyle: {
+                position: "absolute",
+                bottom: 16,
+                left: 16,
+                right: 16,
+                backgroundColor: "#1b1f27",
+                borderRadius: 20,
+                height: computedHeight,
+                paddingTop: 4 + halfExtra,
+                paddingBottom: 4 + halfExtra,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 5,
+                elevation: 5,
+                borderTopWidth: 0,
+            },
+            tabBarItemStyle: {
+                paddingVertical: 0,
+                alignItems: "center",
+                justifyContent: "center",
+            },
+            tabBarIconStyle: {
+                marginTop: 0,
+            },
+            tabBarLabelStyle: {
+                fontSize: 12,
+                lineHeight: 14,
+                marginTop: 2,
+            },
+        }}>
     <MainTab.Screen name="Home" component={HomeFlow} options={{
         tabBarLabel: "Home",
-        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "home" : "home-outline"} size={size} color={color}/>),
+        tabBarIcon: ({ focused, color }) => (<View style={{ width: 28, height: 24, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name={focused ? "home" : "home-outline"} size={24} color={color}/>
+          </View>),
     }}/>
     <MainTab.Screen name="Explore" component={ExploreFlow} options={{
         tabBarLabel: "Buscar",
-        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "search" : "search-outline"} size={size} color={color}/>),
+        tabBarIcon: ({ focused, color }) => (<View style={{ width: 28, height: 24, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name={focused ? "search" : "search-outline"} size={24} color={color}/>
+          </View>),
     }}/>
     <MainTab.Screen name="CheckIn" component={() => null} options={{
         tabBarLabel: "Check-in",
-        tabBarIcon: ({ color, size }) => (<Ionicons name="add-outline" size={size + 4} color={color}/>),
+        tabBarIcon: ({ color }) => (<View style={{ width: 28, height: 24, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name="add-outline" size={26} color={color}/>
+          </View>),
     }} listeners={({ navigation }) => ({
         tabPress: (e) => {
             e.preventDefault();
@@ -156,13 +182,18 @@ const MainTabs = () => (<MainTab.Navigator screenOptions={{
     })}/>
     <MainTab.Screen name="Saved" component={SavedScreen} options={{
         tabBarLabel: "Salvos",
-        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "bookmark" : "bookmark-outline"} size={size} color={color}/>),
+        tabBarIcon: ({ focused, color }) => (<View style={{ width: 28, height: 24, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name={focused ? "bookmark" : "bookmark-outline"} size={24} color={color}/>
+          </View>),
     }}/>
     <MainTab.Screen name="Profile" component={ProfileFlow} options={{
         tabBarLabel: "Perfil",
-        tabBarIcon: ({ focused, color, size }) => (<Ionicons name={focused ? "person" : "person-outline"} size={size} color={color}/>),
+        tabBarIcon: ({ focused, color }) => (<View style={{ width: 28, height: 24, alignItems: "center", justifyContent: "center" }}>
+            <Ionicons name={focused ? "person" : "person-outline"} size={24} color={color}/>
+          </View>),
     }}/>
-  </MainTab.Navigator>);
+    </MainTab.Navigator>);
+};
 const AuthStackScreens = () => (<AuthStack.Navigator screenOptions={{
         ...slideStackOptions,
         headerShown: true,
