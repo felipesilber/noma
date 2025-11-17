@@ -12,22 +12,23 @@ import { ListModule } from './list/list.module';
 import { FeedModule } from './feed/feed.module';
 import { RatingModule } from './rating/rating.module';
 import { FavoriteModule } from './favorite/favorites.module';
+import { HealthController } from './health/health.controller';
 @Module({
-    imports: [
-        PrismaModule,
-        PlaceModule,
-        CategoryModule,
-        ReviewModule,
-        FollowModule,
-        UserModule,
-        SavedPlaceModule,
-        AuthModule,
-        ProfileModule,
-        ListModule,
-        FeedModule,
-        RatingModule,
-        FavoriteModule,
-    ],
+  imports: [
+    PrismaModule,
+    PlaceModule,
+    CategoryModule,
+    ReviewModule,
+    FollowModule,
+    UserModule,
+    SavedPlaceModule,
+    AuthModule,
+    ProfileModule,
+    ListModule,
+    FeedModule,
+    RatingModule,
+    FavoriteModule,
+  ],
+  controllers: [HealthController],
 })
-export class AppModule {
-}
+export class AppModule {}
