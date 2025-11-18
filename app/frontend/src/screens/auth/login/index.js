@@ -31,7 +31,7 @@ const LoginScreen = ({ navigation }) => {
     };
     return (<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ImageBackground source={require("../../../../assets/images/login-background.png")} resizeMode="cover" style={styles.background} blurRadius={0}>
-        <View style={styles.overlay}/>
+        <View style={styles.overlay} pointerEvents="none"/>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.contentContainer}>
             <View style={styles.header}>

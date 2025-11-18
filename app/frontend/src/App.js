@@ -6,6 +6,7 @@ import colors from "./theme/colors";
 import * as Font from "expo-font";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as SplashScreen from "expo-splash-screen";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 SplashScreen.preventAutoHideAsync();
 const App = () => {
     const [appIsReady, setAppIsReady] = useState(false);
@@ -34,15 +35,23 @@ const App = () => {
     if (!appIsReady) {
         return null;
     }
-    return (<SafeAreaProvider>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-        <View style={styles.root} onLayout={onLayoutRootView}>
-          <StatusBar barStyle="light-content" backgroundColor={colors.background}/>
-          <AppNavigator />
-          <FlashMessage position="top" statusBarHeight={Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0}/>
-        </View>
-      </TouchableWithoutFeedback>
-    </SafeAreaProvider>);
+    return (<GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        {Platform.OS === "web" ? (<View style={styles.root} onLayout={onLayoutRootView}>
+            <StatusBar barStyle="light-content" backgroundColor={colors.background}/>
+            <AppNavigator />
+            <View pointerEvents="none">
+              <FlashMessage position="top" statusBarHeight={Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0}/>
+            </View>
+          </View>) : (<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={styles.root} onLayout={onLayoutRootView}>
+              <StatusBar barStyle="light-content" backgroundColor={colors.background}/>
+              <AppNavigator />
+              <FlashMessage position="top" statusBarHeight={Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0}/>
+            </View>
+          </TouchableWithoutFeedback>)}
+      </SafeAreaProvider>
+    </GestureHandlerRootView>);
 };
 const styles = StyleSheet.create({
     root: {
