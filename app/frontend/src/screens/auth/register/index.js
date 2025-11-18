@@ -21,6 +21,10 @@ const RegisterScreen = ({ navigation }) => {
     const onLayoutRootView = useCallback(async () => {
         await SplashScreen.hideAsync();
     }, []);
+	// Limpa mensagens de erro ao trocar de etapa ou editar campos
+	useEffect(() => {
+		setErro(null);
+	}, [step, email, username, senha, confirmSenha]);
     const isValidEmail = /\S+@\S+\.\S+/.test(email);
     const isValidSenha = senha.length >= 8;
     const isConfirmOk = confirmSenha === senha && isValidSenha;
@@ -44,6 +48,7 @@ const RegisterScreen = ({ navigation }) => {
     function next() {
         if (!canContinue || loading)
             return;
+		setErro(null);
         if (step < 3)
             setStep(step + 1);
         else
@@ -52,6 +57,7 @@ const RegisterScreen = ({ navigation }) => {
     function back() {
         if (loading)
             return;
+		setErro(null);
         if (step > 0)
             setStep(step - 1);
         else
@@ -65,11 +71,29 @@ const RegisterScreen = ({ navigation }) => {
             await updateProfile(cred.user, { displayName: username.trim() });
             await cred.user.getIdToken(true);
             try {
-                await api.patch("/user/me/username", { username: username.trim() });
+				await api.patch("/user/me/username", { username: username.trim() });
             }
             catch (e) {
-                setErro("Não foi possível salvar o username (talvez já esteja em uso).");
-                return;
+				// Mensagem amigável para conflito de username
+				const backendMsg = e?.response?.data?.message || "";
+				if (
+					typeof backendMsg === "string" &&
+					backendMsg.toLowerCase().includes("already")
+				) {
+					setErro("Nome de usuário já em uso.");
+				} else {
+					setErro("Não foi possível salvar o username. Tente outro nome.");
+				}
+				// Rollback: remove a conta criada no Firebase para não bloquear nova tentativa
+				try {
+					await cred.user.delete();
+				} catch (delErr) {
+					// Se falhar a exclusão, tenta deslogar
+					try {
+						await auth.signOut();
+					} catch {}
+				}
+				return;
             }
             await sendEmailVerification(cred.user).catch(console.warn);
             navigation?.replace?.("Main");
