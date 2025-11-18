@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Query, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Query, BadRequestException, ConflictException, } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiBody, ApiParam } from '@nestjs/swagger';
@@ -36,14 +36,14 @@ export class UserController {
     }) {
         const username = (body?.username ?? '').trim();
         if (!username) {
-            throw new Error('username is mandatory');
+			throw new BadRequestException('username is mandatory');
         }
         try {
             return await this.userService.updateUsername(userId, username);
         }
         catch (e: any) {
             if (e?.code === 'P2002') {
-                throw new Error('Already in use.');
+				throw new ConflictException('username already in use');
             }
             throw e;
         }
