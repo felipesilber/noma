@@ -21,7 +21,6 @@ const RegisterScreen = ({ navigation }) => {
     const onLayoutRootView = useCallback(async () => {
         await SplashScreen.hideAsync();
     }, []);
-	// Limpa mensagens de erro ao trocar de etapa ou editar campos
 	useEffect(() => {
 		setErro(null);
 	}, [step, email, username, senha, confirmSenha]);
@@ -69,26 +68,25 @@ const RegisterScreen = ({ navigation }) => {
             setErro(null);
             const cred = await createUserWithEmailAndPassword(auth, email.trim(), senha);
             await updateProfile(cred.user, { displayName: username.trim() });
-            await cred.user.getIdToken(true);
+			const idToken = await cred.user.getIdToken(true);
             try {
-				await api.patch("/user/me/username", { username: username.trim() });
+				await api.patch(
+					"/user/me/username",
+					{ username: username.trim() },
+					{ headers: { Authorization: `Bearer ${idToken}` } }
+				);
             }
             catch (e) {
-				// Mensagem amigável para conflito de username
+				const status = e?.response?.status;
 				const backendMsg = e?.response?.data?.message || "";
-				if (
-					typeof backendMsg === "string" &&
-					backendMsg.toLowerCase().includes("already")
-				) {
+				if (status === 409 || (typeof backendMsg === "string" && backendMsg.toLowerCase().includes("already"))) {
 					setErro("Nome de usuário já em uso.");
 				} else {
 					setErro("Não foi possível salvar o username. Tente outro nome.");
 				}
-				// Rollback: remove a conta criada no Firebase para não bloquear nova tentativa
 				try {
 					await cred.user.delete();
 				} catch (delErr) {
-					// Se falhar a exclusão, tenta deslogar
 					try {
 						await auth.signOut();
 					} catch {}
