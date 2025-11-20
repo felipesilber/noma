@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../../theme/colors.js";
 import api from "../../../../../services/api";
+import ErrorView from "../../../../../components/ErrorView";
 const tabs = [
     { key: "popular", label: "Populares" },
     { key: "nearby", label: "Perto" },
@@ -102,7 +103,7 @@ const CategoryScreen = ({ route, navigation }) => {
             return (<ActivityIndicator style={{ marginTop: 40 }} size="large" color={colors.primary}/>);
         }
         if (error) {
-            return <Text style={styles.errorText}>{error}</Text>;
+            return <ErrorView message={error} onRetry={() => fetchPlaces(activeTab)} />;
         }
         return (<FlatList data={places} keyExtractor={(item) => String(item.id)} renderItem={({ item }) => (<PlaceCard item={item} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>)} refreshing={refreshing} onRefresh={() => {
                 setRefreshing(true);

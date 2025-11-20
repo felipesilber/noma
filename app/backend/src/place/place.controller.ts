@@ -70,7 +70,6 @@ export class PlaceController {
     }
     @ApiOperation({ summary: 'Busca os detalhes completos de um lugar' })
     @ApiParam({ name: 'id', required: true, example: 1 })
-    @Public()
     @UseGuards(FirebaseAuthGuard)
     @Get(':id')
     findOne(
@@ -78,6 +77,7 @@ export class PlaceController {
     id: string, 
     @UserId()
     userId: number) {
+        console.log(`[PlaceController] findOne placeId=${id} userId=${userId}`);
         return this.placeService.findOne(Number(id), userId);
     }
 }

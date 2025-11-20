@@ -27,7 +27,7 @@ const IconRating = ({ rating, onRatingChange, type = "star" }) => {
     </View>);
 };
 const AddReviewFormScreen = ({ route, navigation }) => {
-    const { placeName = "Bar do Zé", placeImage = "https://picsum.photos/id/163/800/600", } = route.params || {};
+    const { placeId, placeName = "Bar do Zé", placeImage = "https://picsum.photos/id/163/800/600", } = route.params || {};
     const [overallRating, setOverallRating] = useState(0);
     const [foodRating, setFoodRating] = useState(0);
     const [serviceRating, setServiceRating] = useState(0);
@@ -39,6 +39,20 @@ const AddReviewFormScreen = ({ route, navigation }) => {
     const [visitDate, setVisitDate] = useState(new Date());
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const isFormValid = (() => {
+        const price = Number(pricePaid);
+        const people = Number(numberOfPeople);
+        return (overallRating > 0 &&
+            foodRating > 0 &&
+            serviceRating > 0 &&
+            ambianceRating > 0 &&
+            !!reviewText?.trim?.() &&
+            Number.isFinite(price) &&
+            price > 0 &&
+            Number.isInteger(people) &&
+            people > 0 &&
+            visitDate instanceof Date);
+    })();
     useEffect(() => {
         navigation.setOptions({
             headerShown: true,
@@ -75,8 +89,8 @@ const AddReviewFormScreen = ({ route, navigation }) => {
         }
     };
     const handlePublish = () => {
-        if (overallRating === 0) {
-            showErrorNotification("Atenção", "Dê uma nota geral para o lugar.", {
+        if (!isFormValid) {
+            showErrorNotification("Atenção", "Preencha todos os campos obrigatórios.", {
                 position: "bottom",
             });
             return;
@@ -89,6 +103,41 @@ const AddReviewFormScreen = ({ route, navigation }) => {
             setSubmitting(false);
             navigation.goBack();
         }, 1500);
+    };
+    const renderWebDatePicker = () => {
+        if (!showDatePicker)
+            return null;
+        // Lista simples de datas (últimos 180 dias) para Web
+        const days: { label: string; date: Date }[] = [];
+        const today = new Date();
+        for (let i = 0; i < 180; i++) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            days.push({
+                label: moment(d).format("DD [de] MMMM [de] YYYY"),
+                date: d,
+            });
+        }
+        return (<Modal visible transparent animationType="fade" onRequestClose={() => setShowDatePicker(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "center", padding: 24 }}>
+          <View style={{ backgroundColor: "#1b1f27", borderRadius: 12, maxHeight: "80%" }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#2a2f3a" }}>
+              <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>Escolher data</Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                <Ionicons name="close-outline" size={22} color="#fff"/>
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={{ paddingHorizontal: 12, paddingVertical: 8 }}>
+              {days.map((opt, idx) => (<TouchableOpacity key={idx} style={{ paddingVertical: 12, paddingHorizontal: 8, borderBottomWidth: 1, borderBottomColor: "#2a2f3a" }} onPress={() => {
+                        setVisitDate(opt.date);
+                        setShowDatePicker(false);
+                    }}>
+                  <Text style={{ color: "#fff", fontSize: 16 }}>{opt.label}</Text>
+                </TouchableOpacity>))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>);
     };
     return (<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
@@ -118,8 +167,8 @@ const AddReviewFormScreen = ({ route, navigation }) => {
           </View>
 
           <View style={styles.inputRow}>
-            <TextInput style={styles.inputField} placeholder="Preço Pago" placeholderTextColor="#C8C8C8" keyboardType="decimal-pad"/>
-            <TextInput style={styles.inputField} placeholder="Nº de Pessoas" placeholderTextColor="#C8C8C8" keyboardType="numeric"/>
+            <TextInput style={styles.inputField} placeholder="Preço Pago" placeholderTextColor="#C8C8C8" keyboardType="decimal-pad" value={pricePaid} onChangeText={setPricePaid}/>
+            <TextInput style={styles.inputField} placeholder="Nº de Pessoas" placeholderTextColor="#C8C8C8" keyboardType="numeric" value={numberOfPeople} onChangeText={setNumberOfPeople}/>
           </View>
 
           <TouchableOpacity style={styles.dateInputContainer} onPress={openDatePicker} activeOpacity={0.8}>
@@ -140,17 +189,17 @@ const AddReviewFormScreen = ({ route, navigation }) => {
                   <DateTimePicker value={visitDate} mode="date" display="spinner" onChange={onChangeDate} maximumDate={new Date()} themeVariant="dark" textColor="#FFFFFF"/>
                 </View>
               </View>
-            </Modal>) : (showDatePicker && (<DateTimePicker value={visitDate} mode="date" display="default" onChange={onChangeDate} maximumDate={new Date()}/>))} 
+            </Modal>) : Platform.OS === "web" ? (renderWebDatePicker()) : (showDatePicker && (<DateTimePicker value={visitDate} mode="date" display="default" onChange={onChangeDate} maximumDate={new Date()}/>))} 
 
-          <TextInput style={styles.experienceInput} placeholder="Sua Experiência" placeholderTextColor="#C8C8C8" multiline textAlignVertical="top"/>
+          <TextInput style={styles.experienceInput} placeholder="Sua Experiência" placeholderTextColor="#C8C8C8" multiline textAlignVertical="top" value={reviewText} onChangeText={setReviewText}/>
         </View>
       </ScrollView>
 
       <View style={styles.publishButtonContainer}>
         <TouchableOpacity style={[
             styles.publishButton,
-            submitting && styles.publishButtonDisabled,
-        ]} onPress={handlePublish} disabled={submitting}>
+            (submitting || !isFormValid) && styles.publishButtonDisabled,
+        ]} onPress={handlePublish} disabled={submitting || !isFormValid}>
           {submitting ? (<ActivityIndicator color={colors.background}/>) : (<Text style={styles.publishButtonText}>Publicar</Text>)}
         </TouchableOpacity>
       </View>

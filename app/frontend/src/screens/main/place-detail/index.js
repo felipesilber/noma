@@ -96,14 +96,16 @@ const PlaceDetailScreen = ({ route, navigation }) => {
         }
         setError(null);
         try {
-            const [detailsResponse, ratingsResponse] = await Promise.all([
+            const [detailsResponse, ratingsResponse, savedResponse] = await Promise.all([
                 api.get(`/places/${placeId}`),
                 api.get(`/places/${placeId}/ratings`),
+                api.get(`/saved-places/${placeId}`).catch(() => ({ data: { saved: false } })),
             ]);
-            console.log(ratingsResponse.data);
+            console.log(detailsResponse.data);
             setPlace(detailsResponse.data);
             setRatingsData(ratingsResponse.data);
-            setIsSaved(detailsResponse.data.isSaved);
+            const savedStatus = savedResponse?.data?.saved ?? detailsResponse.data.isSaved;
+            setIsSaved(savedStatus);
         }
         catch (e) {
             console.error("Failed to load place data:", e);

@@ -95,6 +95,23 @@ export class ProfileService {
     async getMyProfile(userId: number): Promise<UserProfileDto> {
         return this.getProfileById(userId, userId);
     }
+    async getVisitedPlaces(userId: number) {
+        const rows = await this.prisma.review.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            distinct: ['placeId'],
+            include: { place: { select: { id: true, name: true, imageUrl: true } } },
+        });
+        return rows.map((r) => r.place);
+    }
+    async getWishlist(userId: number) {
+        const rows = await this.prisma.savedPlace.findMany({
+            where: { userId },
+            orderBy: { createdAt: 'desc' },
+            include: { place: { select: { id: true, name: true, imageUrl: true } } },
+        });
+        return rows.map((r) => r.place);
+    }
     private async _getDashboardStats(userId: number) {
         const reviews = await this.prisma.review.findMany({
             where: { userId },

@@ -16,6 +16,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import styles from "./styles";
 import colors from "../../../../../theme/colors";
 import api from "../../../../../services/api";
+import ErrorView from "../../../../../components/ErrorView";
 const CategoryCard = ({ item, onPress }) => {
   return (
     <TouchableOpacity
@@ -95,12 +96,7 @@ const ExploreScreen = ({ navigation }) => {
             <ActivityIndicator color={colors.primary} />
           </View>
         ) : catsError ? (
-          <View style={styles.errorBox}>
-            <Text style={styles.errorText}>{catsError}</Text>
-            <TouchableOpacity onPress={fetchCategories}>
-              <Text style={styles.retryText}>Tentar novamente</Text>
-            </TouchableOpacity>
-          </View>
+          <ErrorView message={catsError} onRetry={fetchCategories} />
         ) : (
           <FlatList
             data={categories}

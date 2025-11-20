@@ -12,6 +12,7 @@ import RegisterScreen from "../screens/auth/register";
 import SigninScreen from "../screens/auth/signin";
 import HomeScreen from "../screens/main/home";
 import ProfileScreen from "../screens/main/profile";
+import UserPlacesScreen from "../screens/main/profile/user-places";
 import SavedScreen from "../screens/main/saved";
 import PlaceDetailScreen from "../screens/main/place-detail";
 import AllReviewsScreen from "../screens/main/place-detail/all-reviews";
@@ -234,8 +235,9 @@ const AppNavigator = () => (<NavigationContainer theme={AppTheme}>
       <RootStack.Screen name="EditListsScreen" component={EditListsScreen} options={{
         presentation: "modal",
         headerShown: false,
-    }}/>
+      }}/>
       <RootStack.Screen name="UserConnections" component={ConnectionsScreen} options={{ headerShown: false }}/>
+      <RootStack.Screen name="UserPlaces" component={UserPlacesScreen} options={{ headerShown: false }}/>
     </RootStack.Navigator>
   </NavigationContainer>);
 export default AppNavigator;

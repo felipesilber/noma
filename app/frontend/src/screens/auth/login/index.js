@@ -1,19 +1,21 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, SafeAreaView, ImageBackground, TextInput, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, } from "react-native";
+import { View, TouchableOpacity, SafeAreaView, ImageBackground, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Keyboard, TouchableWithoutFeedback } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase/firebase";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import AppText from "../../../components/text";
+import ErrorModal from "../../../components/modals/ErrorModal";
 const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
+    const [errorMsg, setErrorMsg] = useState(null);
     const handleCreateAccount = () => navigation.navigate("Register");
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert("Erro", "Por favor, preencha o e-mail e a senha.");
+            setErrorMsg("Por favor, preencha o e-mail e a senha.");
             return;
         }
         setLoading(true);
@@ -23,13 +25,28 @@ const LoginScreen = ({ navigation }) => {
         }
         catch (e) {
             console.error("Erro no login:", e);
-            Alert.alert("Erro de Login", "E-mail ou senha inválidos. Tente novamente.");
+            const code = e?.code || "";
+            if (code.includes("invalid-email"))
+                setErrorMsg("E-mail inválido.");
+            else if (code.includes("user-disabled"))
+                setErrorMsg("Esta conta foi desativada.");
+            else if (code.includes("user-not-found"))
+                setErrorMsg("Usuário não encontrado.");
+            else if (code.includes("wrong-password"))
+                setErrorMsg("Senha incorreta.");
+            else if (code.includes("too-many-requests"))
+                setErrorMsg("Muitas tentativas. Tente novamente em instantes.");
+            else if (code.includes("network-request-failed"))
+                setErrorMsg("Falha de rede. Verifique sua conexão.");
+            else
+                setErrorMsg("E-mail ou senha inválidos. Tente novamente.");
         }
         finally {
             setLoading(false);
         }
     };
-    return (<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+    return (<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <ImageBackground source={require("../../../../assets/images/login-background.png")} resizeMode="cover" style={styles.background} blurRadius={0}>
         <View style={styles.overlay} pointerEvents="none"/>
         <SafeAreaView style={styles.safeArea}>
@@ -83,6 +100,8 @@ const LoginScreen = ({ navigation }) => {
           </View>
         </SafeAreaView>
       </ImageBackground>
-    </KeyboardAvoidingView>);
+      <ErrorModal visible={!!errorMsg} message={errorMsg || ""} onClose={() => setErrorMsg(null)}/>
+    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>);
 };
 export default LoginScreen;

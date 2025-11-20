@@ -7,6 +7,7 @@ import AppText from "../../../../components/text";
 import api from "../../../../services/api";
 import FollowButton from "../../../../components/follow/FollowButton";
 import { followUser, unfollowUser } from "../../../../services/follow";
+import ErrorView from "../../../../components/ErrorView";
 const UserRow = ({ user, onToggleFollow, onPress }) => {
     const avatar = user.avatarUrl ||
         "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/female/512/20.jpg";
@@ -104,7 +105,7 @@ const ConnectionsScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {loading ? (<View style={styles.centered}><ActivityIndicator color={colors.primary}/></View>) : error ? (<View style={styles.centered}><AppText>{error}</AppText></View>) : (<FlatList data={data} keyExtractor={(item) => String(item.id)} renderItem={({ item }) => (<UserRow user={item} onToggleFollow={onToggleFollow} onPress={() => navigation.navigate("UserProfile", { userId: item.id })}/>)} contentContainerStyle={{ paddingBottom: 24 }}/>)}
+      {loading ? (<View style={styles.centered}><ActivityIndicator color={colors.primary}/></View>) : error ? (<View style={styles.centered}><ErrorView message={error} onRetry={fetchData} /></View>) : (<FlatList data={data} keyExtractor={(item) => String(item.id)} renderItem={({ item }) => (<UserRow user={item} onToggleFollow={onToggleFollow} onPress={() => navigation.navigate("UserProfile", { userId: item.id })}/>)} contentContainerStyle={{ paddingBottom: 24 }}/>)}
     </View>);
 };
 export default ConnectionsScreen;

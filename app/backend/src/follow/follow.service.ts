@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 @Injectable()
 export class FollowService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService, private userService: UserService) { }
     async follow(currentUserId: number, targetUserId: number) {
         if (currentUserId === targetUserId) {
             throw new BadRequestException('Você não pode seguir a si mesmo');
@@ -17,6 +18,9 @@ export class FollowService {
             create: { followerId: currentUserId, followedId: targetUserId },
             update: {},
         });
+        // XP: +2 para quem segue e +2 para quem é seguido
+        this.userService.addXp(currentUserId, 2).catch(() => { });
+        this.userService.addXp(targetUserId, 2).catch(() => { });
     }
     async unfollow(currentUserId: number, targetUserId: number) {
         await this.prisma.follow.deleteMany({

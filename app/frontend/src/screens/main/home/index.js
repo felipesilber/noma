@@ -7,6 +7,7 @@ import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
 import AppText from "../../../components/text";
+import ErrorView from "../../../components/ErrorView";
 const promocoes = [
     {
         id: "pro1",
@@ -119,14 +120,7 @@ const HomeScreen = ({ navigation }) => {
       </View>);
     }
     if (error) {
-        return (<View style={styles.centered}>
-        <AppText style={styles.errorText}>{error}</AppText>
-        <TouchableOpacity onPress={fetchHomeFeed} style={styles.retryButton}>
-          <AppText weight="bold" style={styles.retryButtonText}>
-            Tentar Novamente
-          </AppText>
-        </TouchableOpacity>
-      </View>);
+        return <View style={styles.centered}><ErrorView message={error} onRetry={fetchHomeFeed} /></View>;
     }
     return (<SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.header}>

@@ -19,4 +19,10 @@ export class PlaceRatingsDto {
         nullable: true,
     })
     friendsRating: number | null;
+    @ApiProperty({
+        description: 'Intervalo de preço por pessoa calculado a partir das avaliações (mín e máx)',
+        example: { min: 25.5, max: 78.9 },
+        nullable: true,
+    })
+    pricePerPersonInterval?: { min: number; max: number } | null;
 }

@@ -3,6 +3,42 @@ import { PrismaService } from '../../prisma/prisma.service';
 @Injectable()
 export class UserService {
     constructor(private prisma: PrismaService) { }
+    /**
+     * Incrementa XP e atualiza nível conforme necessário.
+     * Regra: 100 XP por nível; soma ao XP atual e faz carry para níveis seguintes.
+     */
+    async addXp(userId: number, amount: number) {
+        if (!amount || amount === 0)
+            return;
+        await this.prisma.$transaction(async (tx) => {
+            const user = await tx.user.findUnique({
+                where: { id: userId },
+                select: {
+                    id: true,
+                    nomaLevel: true,
+                    nomaCurrentXp: true,
+                    nomaNextLevelXp: true,
+                },
+            });
+            if (!user)
+                return;
+            const fixedThreshold = 100;
+            let currentXp = user.nomaCurrentXp + amount;
+            let level = user.nomaLevel;
+            while (currentXp >= fixedThreshold) {
+                currentXp -= fixedThreshold;
+                level += 1;
+            }
+            await tx.user.update({
+                where: { id: userId },
+                data: {
+                    nomaLevel: level,
+                    nomaCurrentXp: currentXp,
+                    nomaNextLevelXp: fixedThreshold,
+                },
+            });
+        });
+    }
     createFromFirebase(uid: string, email?: string | null, username?: string | null) {
         return this.prisma.user.create({
             data: {

@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
+import ErrorView from "../../../../components/ErrorView";
 const mockMayKnow = [
     {
         id: "m1",
@@ -195,7 +196,7 @@ const ExplorePeopleScreen = ({ navigation }) => {
             return (<ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }}/>);
         }
         if (searchError) {
-            return <Text style={styles.errorText}>{searchError}</Text>;
+            return <ErrorView message={searchError} />;
         }
         if (searchResults.length === 0) {
             return (<Text style={styles.errorText}>

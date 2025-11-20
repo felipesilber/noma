@@ -195,6 +195,9 @@ export class PlaceService {
                 where: { placeId: id, userId: currentUserId },
             })) > 0
             : false;
+        
+        console.log(`[PlaceService] placeId=${id} userId=${currentUserId} isSaved=${isSaved}`);
+
         return this._toPlaceDetailsDto(place, ratingStats, isSaved);
     }
     private _toPlaceSummaryDto(place: any, avgRating?: number | null): PlaceSummaryDto {

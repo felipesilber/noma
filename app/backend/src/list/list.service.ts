@@ -63,12 +63,12 @@ export class ListService {
                     },
                     orderBy: [{ order: 'asc' }, { addedAt: 'desc' }],
                 },
+                user: { select: { username: true, name: true } },
             },
         });
         if (!list)
             throw new NotFoundException('Lista não encontrada');
-        if (list.userId !== userId)
-            throw new ForbiddenException('Acesso negado');
+        // Permitir visualização por outros usuários (somente leitura)
         return {
             id: list.id,
             name: list.name,
@@ -76,6 +76,7 @@ export class ListService {
             imageUrl: list.imageUrl,
             createdAt: list.createdAt,
             updatedAt: list.updatedAt,
+            creatorName: list.user?.username || list.user?.name || null,
             items: list.items.map((it) => ({
                 placeId: it.placeId,
                 order: it.order,

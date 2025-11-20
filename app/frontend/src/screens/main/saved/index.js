@@ -7,6 +7,7 @@ import colors from "../../../theme/colors";
 import api from "../../../services/api";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import AppText from "../../../components/text";
+import ErrorView from "../../../components/ErrorView";
 const SavedPlaceCard = ({ item, onPress, onRemove }) => (<View style={styles.cardContainer}>
     <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
       <Image source={{
@@ -80,12 +81,7 @@ const SavedScreen = ({ navigation }) => {
         }
         if (error) {
             return (<View style={styles.messageContainer}>
-          <AppText style={styles.messageText}>{error}</AppText>
-          <TouchableOpacity onPress={fetchSavedPlaces} style={styles.retryButton}>
-            <AppText weight="bold" style={styles.retryButtonText}>
-              Tentar Novamente
-            </AppText>
-          </TouchableOpacity>
+          <ErrorView message={error} onRetry={fetchSavedPlaces} />
         </View>);
         }
         if (savedPlaces.length === 0) {

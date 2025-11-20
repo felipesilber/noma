@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { Prisma } from '@prisma/client';
+import { UserService } from '../user/user.service';
 @Injectable()
 export class ReviewService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService, private userService: UserService) { }
     async create(userId: number, dto: CreateReviewDto) {
         const review = await this.prisma.review.create({
             data: {
@@ -29,6 +30,8 @@ export class ReviewService {
                 reviewId: review.id,
             },
         });
+        // XP: +10 por review criada
+        this.userService.addXp(userId, 10).catch(() => { });
         return review;
     }
     findByPlace(placeId: number) {

@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useState } from "react";
-import { StatusBar, Platform, View, StyleSheet, Text, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { StatusBar, Platform, View, StyleSheet } from "react-native";
 import AppNavigator from "./navigation";
 import FlashMessage from "react-native-flash-message";
 import colors from "./theme/colors";
@@ -43,13 +43,13 @@ const App = () => {
             <View pointerEvents="none">
               <FlashMessage position="top" statusBarHeight={Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0}/>
             </View>
-          </View>) : (<TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-            <View style={styles.root} onLayout={onLayoutRootView}>
-              <StatusBar barStyle="light-content" backgroundColor={colors.background}/>
-              <AppNavigator />
+          </View>) : (<View style={styles.root} onLayout={onLayoutRootView}>
+            <StatusBar barStyle="light-content" backgroundColor={colors.background}/>
+            <AppNavigator />
+            <View pointerEvents="none">
               <FlashMessage position="top" statusBarHeight={Platform.OS === "ios" ? 44 : StatusBar.currentHeight || 0}/>
             </View>
-          </TouchableWithoutFeedback>)}
+          </View>)}
       </SafeAreaProvider>
     </GestureHandlerRootView>);
 };

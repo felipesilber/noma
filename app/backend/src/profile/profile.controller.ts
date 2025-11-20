@@ -25,4 +25,20 @@ export class ProfileController {
     viewerUserId: number) {
         return this.profile.getProfileById(profileUserId, viewerUserId);
     }
+    @ApiOperation({ summary: 'Lista lugares visitados por um usuário (distinct por lugar)' })
+    @UseGuards(FirebaseAuthGuard)
+    @Get(':userId/visited-places')
+    visited(
+    @Param('userId', ParseIntPipe)
+    profileUserId: number) {
+        return this.profile.getVisitedPlaces(profileUserId);
+    }
+    @ApiOperation({ summary: 'Lista wishlist (lugares salvos) de um usuário' })
+    @UseGuards(FirebaseAuthGuard)
+    @Get(':userId/wishlist')
+    wishlist(
+    @Param('userId', ParseIntPipe)
+    profileUserId: number) {
+        return this.profile.getWishlist(profileUserId);
+    }
 }

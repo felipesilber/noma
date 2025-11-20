@@ -21,6 +21,36 @@ export class RatingsService {
             return value ? parseFloat(value.toFixed(1)) : 0;
         };
         let friendsRating: number | null = null;
+        // Calcula intervalo de preço por pessoa a partir das avaliações
+        const priceSamples = await this.prisma.review.findMany({
+            where: {
+                placeId,
+                pricePaid: { not: null },
+                numberOfPeople: { not: null, gt: 0 },
+            },
+            select: { pricePaid: true, numberOfPeople: true },
+            take: 500, // limite de segurança
+        });
+        let pricePerPersonInterval: { min: number; max: number } | null = null;
+        if (priceSamples.length > 0) {
+            const values = priceSamples
+                .map((r) => {
+                const paid = Number(r.pricePaid as any);
+                const people = r.numberOfPeople || 0;
+                if (!people || Number.isNaN(paid))
+                    return null;
+                return paid / people;
+            })
+                .filter((v): v is number => v !== null && Number.isFinite(v));
+            if (values.length > 0) {
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                pricePerPersonInterval = {
+                    min: parseFloat(min.toFixed(2)),
+                    max: parseFloat(max.toFixed(2)),
+                };
+            }
+        }
         if (currentUserId) {
             const followingIds = await this.prisma.follow
                 .findMany({
@@ -54,6 +84,7 @@ export class RatingsService {
             ambiance: formatAvg(ratingStats._avg.environmentRating),
             totalReviews: ratingStats._count.generalRating || 0,
             friendsRating,
+            pricePerPersonInterval,
         };
     }
 }

@@ -259,8 +259,16 @@ const ProfileScreen = ({ navigation, route }) => {
         })}/>
         </View>
         <View style={styles.statsRow}>
-          <StatBox value={stats?.visitedPlacesCount} label="Lugares visitados"/>
-          <StatBox value={stats?.wishlistCount} label="Lugares que quero ir"/>
+          <StatBox value={stats?.visitedPlacesCount} label="Lugares visitados" onPress={() => navigation.navigate("UserPlaces", {
+                userId: viewedUserId ?? profileData?.id,
+                username: `${username}`,
+                listType: "visited",
+            })}/>
+          <StatBox value={stats?.wishlistCount} label="Lugares que quero ir" onPress={() => navigation.navigate("UserPlaces", {
+                userId: viewedUserId ?? profileData?.id,
+                username: `${username}`,
+                listType: "wishlist",
+            })}/>
         </View>
 
         <Section title="Noma">

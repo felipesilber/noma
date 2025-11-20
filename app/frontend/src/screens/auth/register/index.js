@@ -8,6 +8,8 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import styles from "./styles";
 import colors from "../../../theme/colors";
@@ -121,6 +123,7 @@ const RegisterScreen = ({ navigation }) => {
     }
   }
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -294,12 +297,13 @@ const RegisterScreen = ({ navigation }) => {
             <ActivityIndicator color={colors.surface} />
           ) : (
             <AppText weight="bold" style={styles.primaryText}>
-              {step < 3 ? "Continuar" : "Finalizar Cadastro"}
+              {step < 3 ? "Continuar" : "Finalizar"}
             </AppText>
           )}
         </Pressable>
       </View>
     </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 export default RegisterScreen;

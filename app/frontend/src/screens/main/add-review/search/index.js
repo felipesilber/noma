@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
+import ErrorView from "../../../../components/ErrorView";
 const AddReviewSearchScreen = ({ navigation }) => {
     const [searchText, setSearchText] = useState("");
     const [results, setResults] = useState([]);
@@ -66,7 +67,7 @@ const AddReviewSearchScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.mainContent}>
-        {loading ? (<ActivityIndicator color={colors.primary}/>) : erro ? (<Text style={styles.errorText}>{erro}</Text>) : results.length > 0 ? (results.map((p) => <SearchResultCard key={p.id} item={p}/>)) : searchText.trim().length >= 2 ? (<Text style={styles.noResultsText}>
+        {loading ? (<ActivityIndicator color={colors.primary}/>) : erro ? (<ErrorView message={erro} onRetry={() => fetchPlaces(searchText)} />) : results.length > 0 ? (results.map((p) => <SearchResultCard key={p.id} item={p}/>)) : searchText.trim().length >= 2 ? (<Text style={styles.noResultsText}>
             Nenhum estabelecimento encontrado para “{searchText}”.
           </Text>) : (<Text style={styles.noResultsText}>
             Comece digitando (mínimo 2 caracteres)…
