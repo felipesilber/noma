@@ -150,6 +150,16 @@ const PlaceDetailScreen = ({ route, navigation }) => {
         }
     };
     const goToAddReview = () => {
+        if (!place)
+            return;
+        navigation.navigate("AddReviewFlow", {
+            screen: "AddReviewForm",
+            params: {
+                placeId,
+                placeName: place.name,
+                placeImage: headerImage,
+            },
+        });
     };
     const handleCopyAddress = async () => {
     };

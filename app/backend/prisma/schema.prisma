@@ -116,6 +116,7 @@ model List {
   name        String
   description String?
   imageUrl    String?    // Adicionado para o carrossel do perfil
+  isRanking   Boolean   @default(false) // Indica se a lista é um ranking (ordem importa)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, Alert, RefreshControl, } from "react-native";
+import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, RefreshControl, } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -147,7 +147,7 @@ const ProfileScreen = ({ navigation, route }) => {
         }
         catch (logoutError) {
             console.error("Erro ao sair:", logoutError);
-            Alert.alert("Erro ao sair", "Não foi possível sair da conta. Tente novamente.");
+            showErrorNotification("Erro ao sair", "Não foi possível sair da conta. Tente novamente.", { position: "bottom" });
         }
         finally {
             setLoggingOut(false);

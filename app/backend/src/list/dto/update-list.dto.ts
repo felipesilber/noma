@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsUrl } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUrl, IsBoolean } from 'class-validator';
 export class UpdateListDto {
     @ApiProperty({
         description: 'Novo nome da lista',
@@ -21,4 +21,11 @@ export class UpdateListDto {
     @IsOptional()
     @IsUrl()
     imageUrl?: string;
+  @ApiProperty({
+        description: 'Indica se a lista é um ranking (ordem importa)',
+        required: false,
+    })
+  @IsOptional()
+  @IsBoolean()
+  isRanking?: boolean;
 }

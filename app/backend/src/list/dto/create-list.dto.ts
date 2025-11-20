@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsUrl, IsArray, IsInt, } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsUrl, IsArray, IsInt, IsBoolean, } from 'class-validator';
 export class CreateListDto {
     @ApiProperty({ description: 'Nome da lista', example: 'Bares em Pinheiros' })
     @IsString()
@@ -25,4 +25,12 @@ export class CreateListDto {
     @IsArray()
     @IsInt({ each: true })
     placeIds?: number[];
+  @ApiProperty({
+        description: 'Indica se a lista é um ranking (ordem importa)',
+        required: false,
+        default: false,
+    })
+  @IsOptional()
+  @IsBoolean()
+  isRanking?: boolean;
 }

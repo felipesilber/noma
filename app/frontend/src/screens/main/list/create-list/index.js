@@ -57,6 +57,7 @@ const CreateListScreen = ({ navigation }) => {
                 description: description || null,
                 imageUrl: "https://picsum.photos/id/102/600/400",
                 placeIds: placeIds,
+                isRanking,
             };
             await api.post("/lists", newList);
             showSuccessNotification("Lista criada", "Sua lista foi salva com sucesso.");

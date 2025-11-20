@@ -14,6 +14,7 @@ export class ListService {
                     name: listData.name,
                     description: listData.description,
                     imageUrl: listData.imageUrl,
+                    isRanking: listData.isRanking ?? false,
                     items: placeIds && placeIds.length > 0
                         ? {
                             create: placeIds.map((id, index) => ({
@@ -44,6 +45,7 @@ export class ListService {
                 name: true,
                 description: true,
                 imageUrl: true,
+                isRanking: true,
                 createdAt: true,
                 updatedAt: true,
                 _count: { select: { items: true } },
@@ -74,6 +76,7 @@ export class ListService {
             name: list.name,
             description: list.description,
             imageUrl: list.imageUrl,
+            isRanking: list.isRanking,
             createdAt: list.createdAt,
             updatedAt: list.updatedAt,
             creatorName: list.user?.username || null,

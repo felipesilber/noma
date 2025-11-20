@@ -52,6 +52,20 @@ export default StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: colors.divider,
     },
+    placeRankBadge: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: colors.primary,
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 8,
+    },
+    placeRankText: {
+        color: colors.textPrimary,
+        fontWeight: "bold",
+        fontSize: 14,
+    },
     placeItemImage: {
         width: 56,
         height: 56,

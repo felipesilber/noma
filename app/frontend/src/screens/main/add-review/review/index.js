@@ -7,6 +7,8 @@ import colors from "../../../../theme/colors";
 import moment from "moment";
 import "moment/locale/pt-br";
 import { showErrorNotification, showSuccessNotification, } from "../../../../utils/notifications";
+import api from "../../../../services/api";
+
 const IconRating = ({ rating, onRatingChange, type = "star" }) => {
     const getIconName = (index) => {
         const isSelected = index <= rating;
@@ -88,7 +90,7 @@ const AddReviewFormScreen = ({ route, navigation }) => {
             setVisitDate(selectedDate);
         }
     };
-    const handlePublish = () => {
+    const handlePublish = async () => {
         if (!isFormValid) {
             showErrorNotification("Atenção", "Preencha todos os campos obrigatórios.", {
                 position: "bottom",
@@ -96,19 +98,34 @@ const AddReviewFormScreen = ({ route, navigation }) => {
             return;
         }
         setSubmitting(true);
-        setTimeout(() => {
+        try {
+            await api.post("/reviews", {
+                placeId: Number(placeId),
+                generalRating: overallRating,
+                foodRating,
+                serviceRating,
+                environmentRating: ambianceRating,
+                pricePaid: Number(pricePaid),
+                numberOfPeople: Number(numberOfPeople),
+                comment: reviewText,
+            });
             showSuccessNotification("Avaliação publicada", "Sua experiência foi registrada.", {
                 position: "bottom",
             });
-            setSubmitting(false);
             navigation.goBack();
-        }, 1500);
+        } catch (error) {
+            console.error("Erro ao publicar review:", error);
+            showErrorNotification("Erro", "Não foi possível publicar sua avaliação. Tente novamente.", {
+                position: "bottom",
+            });
+        } finally {
+            setSubmitting(false);
+        }
     };
     const renderWebDatePicker = () => {
         if (!showDatePicker)
             return null;
-        // Lista simples de datas (últimos 180 dias) para Web
-        const days: { label: string; date: Date }[] = [];
+        const days = [];
         const today = new Date();
         for (let i = 0; i < 180; i++) {
             const d = new Date(today);

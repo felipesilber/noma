@@ -6,11 +6,14 @@ import colors from "../../../theme/colors";
 import moment from "moment";
 import "moment/locale/pt-br";
 import api from "../../../services/api";
-const PlaceItem = ({ item, onPress }) => {
+const PlaceItem = ({ item, index, isRanking, onPress }) => {
     const place = item.place;
     const rating = 4.5;
     const distance = 0.8;
     return (<TouchableOpacity style={styles.placeItemContainer} onPress={onPress}>
+      {isRanking && (<View style={styles.placeRankBadge}>
+          <Text style={styles.placeRankText}>{index + 1}</Text>
+        </View>)}
       <Image source={{ uri: place.imageUrl }} style={styles.placeItemImage}/>
       <View style={styles.placeItemInfo}>
         <Text style={styles.placeItemName}>{place.name}</Text>
@@ -80,7 +83,7 @@ const ListDetailScreen = () => {
 
       <Text style={styles.sectionTitle}>Lugares</Text>
       <View style={styles.placesListContainer}>
-        {listData.items.map((item) => (<PlaceItem key={item.placeId} item={item} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.placeId })}/>))}
+        {listData.items.map((item, index) => (<PlaceItem key={item.placeId} item={item} index={index} isRanking={listData.isRanking} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.placeId })}/>))}
       </View>
     </ScrollView>);
 };

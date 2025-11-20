@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { showErrorNotification } from "../../../../utils/notifications";
 const FavoriteItemCard = ({ item, onRemove }) => {
     const navigation = useNavigation();
     const place = item.place;
@@ -33,7 +34,7 @@ const EditFavoritesScreen = ({ navigation }) => {
             setFavorites(response.data);
         }
         catch (err) {
-            Alert.alert("Erro", "Não foi possível carregar seus favoritos.");
+            showErrorNotification("Erro", "Não foi possível carregar seus favoritos.", { position: "bottom" });
         }
         finally {
             setLoading(false);
@@ -50,7 +51,7 @@ const EditFavoritesScreen = ({ navigation }) => {
             await api.delete(`/favorite-places/${placeId}`);
         }
         catch (err) {
-            Alert.alert("Erro", "Não foi possível remover o favorito.");
+            showErrorNotification("Erro", "Não foi possível remover o favorito.", { position: "bottom" });
             fetchFavorites();
         }
     };

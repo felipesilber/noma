@@ -4,7 +4,7 @@ const PADDING = 16;
 export default StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
     },
     header: {
         flexDirection: "row",
@@ -12,7 +12,7 @@ export default StyleSheet.create({
         paddingHorizontal: PADDING,
         paddingTop: Platform.OS === "ios" ? 50 : 20,
         paddingBottom: 12,
-        backgroundColor: colors.surface,
+        backgroundColor: colors.background,
         borderBottomWidth: 1,
         borderBottomColor: colors.divider,
     },
@@ -20,7 +20,7 @@ export default StyleSheet.create({
         flex: 1,
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: colors.background,
+        backgroundColor: colors.surface,
         borderRadius: 10,
         paddingHorizontal: 12,
         height: 44,

@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
+import { showErrorNotification } from "../../../../utils/notifications";
 const ListItemCard = ({ item, onEdit, onRemove }) => {
     const placeCount = item._count?.items || 0;
     return (<View style={styles.cardContainer}>
@@ -32,7 +33,7 @@ const EditListsScreen = ({ navigation }) => {
             setLists(response.data);
         }
         catch (err) {
-            Alert.alert("Erro", "Não foi possível carregar suas listas.");
+            showErrorNotification("Erro", "Não foi possível carregar suas listas.", { position: "bottom" });
         }
         finally {
             setLoading(false);
@@ -55,7 +56,7 @@ const EditListsScreen = ({ navigation }) => {
                         await api.delete(`/lists/${listId}`);
                     }
                     catch (err) {
-                        Alert.alert("Erro", "Não foi possível remover a lista.");
+                        showErrorNotification("Erro", "Não foi possível remover a lista.", { position: "bottom" });
                         fetchLists();
                     }
                 },

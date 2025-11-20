@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, TouchableOpacity, FlatList, Image, ActivityIndicator, StyleSheet, Alert, RefreshControl, } from "react-native";
+import { View, TouchableOpacity, FlatList, Image, ActivityIndicator, StyleSheet, RefreshControl, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
@@ -8,6 +8,7 @@ import api from "../../../services/api";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import AppText from "../../../components/text";
 import ErrorView from "../../../components/ErrorView";
+import { showErrorNotification } from "../../../utils/notifications";
 const SavedPlaceCard = ({ item, onPress, onRemove }) => (<View style={styles.cardContainer}>
     <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
       <Image source={{
@@ -69,7 +70,7 @@ const SavedScreen = ({ navigation }) => {
         }
         catch (err) {
             console.error("Erro ao remover lugar salvo:", err);
-            Alert.alert("Erro", "Não foi possível remover o item. Tente novamente.");
+            showErrorNotification("Erro", "Não foi possível remover o item. Tente novamente.", { position: "bottom" });
             fetchSavedPlaces();
         }
     };

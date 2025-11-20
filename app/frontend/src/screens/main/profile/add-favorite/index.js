@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, Image, Alert, } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, Image, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
+import { showSuccessNotification, showErrorNotification, showInfoNotification } from "../../../../utils/notifications";
 const PlaceResultCard = ({ item, onPress }) => (<TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={onPress}>
     <Image source={{ uri: item.image }} style={styles.cardImage}/>
     <View style={styles.cardInfo}>
@@ -54,16 +55,16 @@ const AddFavoriteScreen = ({ navigation }) => {
     const handleSelectPlace = async (place) => {
         try {
             await api.post("/favorite-places", { placeId: place.id });
-            Alert.alert("Adicionado!", `${place.name} foi adicionado aos seus favoritos.`);
+            showSuccessNotification("Adicionado!", `${place.name} foi adicionado aos seus favoritos.`, { position: "bottom" });
             navigation.goBack();
         }
         catch (e) {
             console.error("Erro ao salvar favorito:", e);
             if (e.response && e.response.data?.message?.includes("já está")) {
-                Alert.alert("Atenção", "Este lugar já está nos seus favoritos.");
+                showInfoNotification("Atenção", "Este lugar já está nos seus favoritos.", { position: "bottom" });
             }
             else {
-                Alert.alert("Erro", "Não foi possível salvar este lugar.");
+                showErrorNotification("Erro", "Não foi possível salvar este lugar.", { position: "bottom" });
             }
         }
     };
