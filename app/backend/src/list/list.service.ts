@@ -63,7 +63,7 @@ export class ListService {
                     },
                     orderBy: [{ order: 'asc' }, { addedAt: 'desc' }],
                 },
-                user: { select: { username: true, name: true } },
+                user: { select: { username: true } },
             },
         });
         if (!list)
@@ -76,7 +76,7 @@ export class ListService {
             imageUrl: list.imageUrl,
             createdAt: list.createdAt,
             updatedAt: list.updatedAt,
-            creatorName: list.user?.username || list.user?.name || null,
+            creatorName: list.user?.username || null,
             items: list.items.map((it) => ({
                 placeId: it.placeId,
                 order: it.order,
