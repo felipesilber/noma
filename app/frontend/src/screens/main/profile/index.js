@@ -40,6 +40,14 @@ const DashboardStatCard = ({ label, value }) => (<View style={styles.dashboardSt
       {value}
     </AppText>
   </View>);
+const UserListCard = ({ item, onPress }) => (<TouchableOpacity style={styles.userListCard} onPress={onPress} activeOpacity={0.8}>
+    <View style={styles.userListCardContent}>
+      <AppText weight="bold" style={styles.userListCardTitle} numberOfLines={1}>
+        {item.name}
+      </AppText>
+      {item.isRanking && (<Ionicons name="trophy-outline" size={18} color={colors.primary} style={styles.userListCardIcon}/>)} 
+    </View>
+  </TouchableOpacity>);
 const Section = ({ title, children, actionIcon, onPressAction }) => (<View style={styles.sectionContainer}>
     <View style={styles.sectionHeader}>
       <AppText weight="bold" style={styles.sectionTitle}>
@@ -318,12 +326,12 @@ const ProfileScreen = ({ navigation, route }) => {
         <Section title="Listas" actionIcon={isOwnProfile && userLists.length > 0 ? "create-outline" : null} onPressAction={isOwnProfile
             ? () => navigation.navigate("EditListsScreen")
             : null}>
-          <FlatList data={userLists} renderItem={({ item }) => (<PlaceCarouselCard item={{ ...item, image: item.imageUrl }} onPress={() => navigation.navigate("ListDetail", {
+          <FlatList data={userLists} renderItem={({ item }) => (<UserListCard item={item} onPress={() => navigation.navigate("ListDetail", {
                 listId: item.id,
                 listName: item.name,
             })}/>)} ListEmptyComponent={<EmptyStateCard title="Nenhuma lista criada" description="Crie listas personalizadas de restaurantes e bares para organizar seus lugares favoritos." buttonText={isOwnProfile ? "Criar Nova Lista" : null} onPress={isOwnProfile
                 ? () => navigation.navigate("CreateListFlow")
-                : undefined}/>} keyExtractor={(item) => String(item.id)} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}/>
+                : undefined}/>} keyExtractor={(item) => String(item.id)} scrollEnabled={false} showsVerticalScrollIndicator={false} contentContainerStyle={styles.verticalList}/>
         </Section>
 
         <View style={{ height: 40 }}/>

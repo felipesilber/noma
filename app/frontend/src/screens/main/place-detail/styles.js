@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         position: "relative",
     },
-    mapPlaceholderImage: {
+    mapView: {
         width: "100%",
         height: "100%",
     },

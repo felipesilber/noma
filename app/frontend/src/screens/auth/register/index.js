@@ -20,9 +20,9 @@ import {
   updateProfile,
 } from "firebase/auth";
 import api from "../../../services/api";
-import { Ionicons } from "@expo/vector-icons";
 import AppText from "../../../components/text";
 import * as SplashScreen from "expo-splash-screen";
+import BackButton from "../../../components/BackButton";
 const RegisterScreen = ({ navigation }) => {
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");
@@ -130,9 +130,7 @@ const RegisterScreen = ({ navigation }) => {
       onLayout={onLayoutRootView}
     >
       <View style={styles.header}>
-        <TouchableOpacity onPress={back} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
+        <BackButton onPress={back} style={styles.backButton} />
       </View>
 
       <View style={styles.progressContainer}>

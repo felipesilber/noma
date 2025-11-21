@@ -2,12 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
   Image,
-  Keyboard,
   RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -32,7 +30,6 @@ const CategoryCard = ({ item, onPress }) => {
   );
 };
 const ExploreScreen = ({ navigation }) => {
-  const [searchText, setSearchText] = useState("");
   const tabBarHeight = useBottomTabBarHeight();
   const GRID_BOTTOM = tabBarHeight + 24;
   const [loadingCats, setLoadingCats] = useState(true);
@@ -51,7 +48,6 @@ const ExploreScreen = ({ navigation }) => {
         name: category.name,
         image: category.imageUrl,
       }));
-      console.log(mappedCategories);
       setCategories(mappedCategories);
     } catch (err) {
       console.error("Erro ao buscar categorias:", err);
@@ -64,29 +60,23 @@ const ExploreScreen = ({ navigation }) => {
   useEffect(() => {
     fetchCategories();
   }, []);
-  const goToSearch = () => {
-    const q = searchText.trim();
-    Keyboard.dismiss();
-  };
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
-      <View style={styles.searchBarWrapper}>
+      <TouchableOpacity
+        style={styles.searchBarWrapper}
+        activeOpacity={0.9}
+        onPress={() => navigation.navigate("Search")}
+      >
         <Ionicons
           name="search"
           size={18}
           color={colors.textSecondary}
           style={styles.searchIcon}
         />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Restaurante ou prato"
-          placeholderTextColor={colors.textSecondary}
-          value={searchText}
-          onChangeText={setSearchText}
-          returnKeyType="search"
-          onSubmitEditing={goToSearch}
-        />
-      </View>
+        <Text style={styles.searchInput} numberOfLines={1}>
+          Restaurante ou prato
+        </Text>
+      </TouchableOpacity>
 
       <Text style={styles.exploreCategoriesTitle}>Explorar por categoria</Text>
 

@@ -97,7 +97,6 @@ const ExplorePeopleScreen = ({ navigation }) => {
                 api.get("/user/suggestions", { params: { limit: 3 } }),
                 api.get("/user/active", { params: { limit: 3 } }),
             ]);
-            console.log(activeRes);
             const mappedPopular = suggestionsRes.data.map((u) => ({
                 id: u.id,
                 name: u.username,

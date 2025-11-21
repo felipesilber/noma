@@ -6,7 +6,7 @@ export class FeedService {
     constructor(private prisma: PrismaService) { }
     async getHomeFeed(userId: number): Promise<HomeFeedDto> {
         const [featuredPlaces, recommendedPlaces, friendActivityPreview, events] = await Promise.all([
-            this._getFeaturedPlaces(),
+            this._getFeaturedPlaces(userId),
             this._getRecommendedPlaces(userId),
             this._getFriendActivityPreview(userId),
             this._getEvents(),
@@ -18,13 +18,14 @@ export class FeedService {
             events,
         };
     }
-    private async _getFeaturedPlaces(): Promise<PlaceSummaryDto[]> {
+    private async _getFeaturedPlaces(userId: number): Promise<PlaceSummaryDto[]> {
         const places = await this.prisma.place.findMany({
             take: 5,
             orderBy: { createdAt: 'desc' },
             include: { category: true },
         });
-        return places.map((p) => this._toPlaceSummaryDto(p));
+        const friendsCountMap = await this._getFriendsReviewsCount(userId, places.map((p) => p.id));
+        return places.map((p) => this._toPlaceSummaryDto(p, friendsCountMap.get(p.id) || 0));
     }
     private async _getRecommendedPlaces(userId: number): Promise<PlaceSummaryDto[]> {
         const topCategory = await this.prisma.review.groupBy({
@@ -35,12 +36,13 @@ export class FeedService {
             take: 1,
         });
         if (!topCategory.length)
-            return this._getFeaturedPlaces();
+            return this._getFeaturedPlaces(userId);
         const places = await this.prisma.place.findMany({
             take: 5,
             include: { category: true },
         });
-        return places.map((p) => this._toPlaceSummaryDto(p));
+        const friendsCountMap = await this._getFriendsReviewsCount(userId, places.map((p) => p.id));
+        return places.map((p) => this._toPlaceSummaryDto(p, friendsCountMap.get(p.id) || 0));
     }
     private async _getFriendActivityPreview(userId: number) {
         const following = await this.prisma.follow.findMany({
@@ -108,7 +110,37 @@ export class FeedService {
             place: event.place,
         }));
     }
-    private _toPlaceSummaryDto(place: any): PlaceSummaryDto {
+    private async _getFriendsReviewsCount(userId: number, placeIds: number[]): Promise<Map<number, number>> {
+        if (!placeIds.length)
+            return new Map();
+        const follows = await this.prisma.follow.findMany({
+            where: { followerId: userId },
+            select: { followedId: true },
+        });
+        const friendIds = follows.map((f) => f.followedId);
+        if (!friendIds.length)
+            return new Map();
+        const rows = await this.prisma.review.findMany({
+            where: {
+                placeId: { in: placeIds },
+                userId: { in: friendIds },
+            },
+            select: { placeId: true, userId: true },
+        });
+        const map = new Map<number, Set<number>>();
+        for (const row of rows) {
+            if (!map.has(row.placeId)) {
+                map.set(row.placeId, new Set<number>());
+            }
+            map.get(row.placeId)!.add(row.userId);
+        }
+        const counts = new Map<number, number>();
+        for (const [placeId, set] of map.entries()) {
+            counts.set(placeId, set.size);
+        }
+        return counts;
+    }
+    private _toPlaceSummaryDto(place: any, friendsReviewsCount = 0): PlaceSummaryDto {
         return {
             id: place.id,
             name: place.name,
@@ -117,6 +149,7 @@ export class FeedService {
             category: place.category.name,
             distanceInKm: 1.2,
             tag: place.tag,
+            friendsReviewsCount,
         };
     }
 }

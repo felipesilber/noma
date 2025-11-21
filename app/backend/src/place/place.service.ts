@@ -196,7 +196,6 @@ export class PlaceService {
             })) > 0
             : false;
         
-        console.log(`[PlaceService] placeId=${id} userId=${currentUserId} isSaved=${isSaved}`);
 
         return this._toPlaceDetailsDto(place, ratingStats, isSaved);
     }

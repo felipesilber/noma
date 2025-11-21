@@ -201,6 +201,9 @@ const styles = StyleSheet.create({
     horizontalList: {
         paddingHorizontal: PADDING,
     },
+    verticalList: {
+        paddingHorizontal: PADDING,
+    },
     placeCard: {
         width: 160,
         gap: 8,
@@ -215,6 +218,30 @@ const styles = StyleSheet.create({
     placeCardTitle: {
         fontSize: 16,
         color: "#fff",
+    },
+    userListCard: {
+        width: "100%",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#3b4354",
+        backgroundColor: colors.surface,
+        marginBottom: 8,
+    },
+    userListCardContent: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 8,
+    },
+    userListCardTitle: {
+        fontSize: 16,
+        color: "#fff",
+        flexShrink: 1,
+    },
+    userListCardIcon: {
+        marginLeft: 4,
     },
     centered: {
         flex: 1,

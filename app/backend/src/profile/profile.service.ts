@@ -88,6 +88,7 @@ export class ProfileService {
                     id: l.id,
                     name: l.name,
                     imageUrl: l.imageUrl,
+                    isRanking: l.isRanking,
                 })),
             },
         };

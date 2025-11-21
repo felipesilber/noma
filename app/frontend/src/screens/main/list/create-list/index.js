@@ -8,6 +8,7 @@ import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
 import { useRoute } from "@react-navigation/native";
 import { showErrorNotification, showSuccessNotification, } from "../../../../utils/notifications";
+import BackButton from "../../../../components/BackButton";
 const AddedPlaceCard = ({ place, onRemove, onDrag, isRanking }) => (<View style={styles.addedPlaceCard}>
     {isRanking && (<TouchableOpacity onLongPress={onDrag} style={styles.dragHandle}>
         <Ionicons name="list-outline" size={24} color={colors.textSecondary}/>
@@ -73,9 +74,7 @@ const CreateListScreen = ({ navigation }) => {
     useEffect(() => {
         navigation.setOptions({
             headerTitle: "Criar Nova Lista",
-            headerLeft: () => (<TouchableOpacity onPress={() => navigation.getParent().goBack()} style={{ marginLeft: 16 }}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary}/>
-        </TouchableOpacity>),
+            headerLeft: () => (<BackButton onPress={() => navigation.getParent().goBack()} />),
             headerRight: () => (<TouchableOpacity onPress={handleSave} disabled={isSaving} style={styles.headerSaveButton}>
           {isSaving ? (<ActivityIndicator size="small" color={colors.primary}/>) : (<Text style={styles.headerSaveButtonText}>Salvar</Text>)}
         </TouchableOpacity>),

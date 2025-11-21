@@ -5,6 +5,7 @@ import styles from "./styles";
 import colors from "../../../../../theme/colors.js";
 import api from "../../../../../services/api";
 import ErrorView from "../../../../../components/ErrorView";
+import BackButton from "../../../../../components/BackButton";
 const tabs = [
     { key: "popular", label: "Populares" },
     { key: "nearby", label: "Perto" },
@@ -17,16 +18,25 @@ const PlaceCard = ({ item, onPress }) => {
     const rating = typeof item.avgRating === "number"
         ? item.avgRating.toFixed(1)
         : String(item.avgRating ?? "-");
+    const friends = item.friendsReviewsCount || 0;
     return (<TouchableOpacity style={styles.placeCard} activeOpacity={0.8} onPress={onPress}>
       <View style={styles.placeInfo}>
         <Text style={styles.placeTitle}>{item.name}</Text>
         <View style={styles.ratingRow}>
-          <Text style={styles.placeDetails}>{rating}</Text>
-          <Ionicons name="star" size={14} color={colors.textSecondary} style={styles.starIcon}/>
-          <Text style={styles.placeDetails}>
+        <Text style={styles.placeDetails}>{rating}</Text>
+        <Ionicons name="star" size={14} color={colors.textSecondary} style={styles.starIcon}/>
+        <Text style={styles.placeDetails}>
             {`∙ ${distanceStr} km${item.priceRange ? ` • ${item.priceRange}` : ""}`}
           </Text>
         </View>
+      {friends > 0 && (<View style={styles.friendsRow}>
+          <Ionicons name="person-outline" size={14} color={colors.primary} style={styles.friendsIcon}/>
+          <Text style={styles.friendsText}>
+            {friends === 1
+                ? "1 amigo avaliou aqui"
+                : `${friends} amigos avaliaram aqui`}
+          </Text>
+        </View>)}
       </View>
       <Image source={{ uri: item.imageUrl }} style={styles.placeImage}/>
     </TouchableOpacity>);
@@ -43,9 +53,7 @@ const CategoryScreen = ({ route, navigation }) => {
             headerShown: true,
             headerTitle: categoryName,
             headerTitleAlign: "center",
-            headerLeft: () => (<TouchableOpacity onPress={() => navigation.goBack()} style={{ marginLeft: 16 }}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary}/>
-        </TouchableOpacity>),
+            headerLeft: () => (<BackButton onPress={() => navigation.goBack()} />),
             headerRight: () => (<TouchableOpacity onPress={() => { }} style={{ marginRight: 16 }}>
           <Ionicons name="filter" size={24} color={colors.textPrimary}/>
         </TouchableOpacity>),
@@ -72,7 +80,6 @@ const CategoryScreen = ({ route, navigation }) => {
                 });
             }
             else {
-                console.log({ ...baseParams, sort: tabKey, limit: 30 });
                 resp = await api.get("/places", {
                     params: { ...baseParams, sort: tabKey, limit: 30 },
                 });
@@ -84,6 +91,7 @@ const CategoryScreen = ({ route, navigation }) => {
                 avgRating: p.avgRating ?? 0,
                 distanceInKm: p.distanceInKm ?? 0,
                 priceRange: p.priceRange ?? null,
+                friendsReviewsCount: p.friendsReviewsCount ?? 0,
             }));
             setPlaces(normalized);
         }

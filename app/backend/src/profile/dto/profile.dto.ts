@@ -7,6 +7,7 @@ class UserListDto {
     id: number;
     name: string;
     imageUrl: string | null;
+    isRanking: boolean;
 }
 export class UserProfileDto {
     id: number;

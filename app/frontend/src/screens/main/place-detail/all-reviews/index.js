@@ -6,6 +6,7 @@ import RatingsSummary from "../components/RatingsSummary";
 import colors from "../../../../theme/colors";
 import AppText from "../../../../components/text";
 import api from "../../../../services/api";
+import BackButton from "../../../../components/BackButton";
 import moment from "moment";
 import "moment/locale/pt-br";
 const ReviewItem = ({ review }) => {
@@ -54,7 +55,6 @@ const AllReviewsScreen = ({ route, navigation }) => {
         const { data } = await api.get(`/reviews/by-place/${placeId}/list`, {
             params: { page: nextPage, limit, scope: selectedScope },
         });
-        console.log(data);
         if (nextPage === 1) {
             setData(data.data);
         }
@@ -112,9 +112,7 @@ const AllReviewsScreen = ({ route, navigation }) => {
     };
     return (<View style={styles.container}>
       <View style={styles.headerBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
-          <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.headerBack} />
         <AppText weight="bold" style={styles.headerTitle}>Todas as Avaliações</AppText>
       </View>
 

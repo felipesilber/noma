@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, ActivityIndicator, StyleSheet, Platform, RefreshControl, } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
@@ -10,6 +11,7 @@ import "moment/locale/pt-br";
 import AppText from "../../../components/text";
 import { showErrorNotification, showSuccessNotification } from "../../../utils/notifications";
 import RatingsSummary from "./components/RatingsSummary";
+import BackButton from "../../../components/BackButton";
 function formatRating(v) {
     return typeof v === "number" && !Number.isNaN(v) ? String(v.toFixed(1)) : "-";
 }
@@ -45,12 +47,25 @@ const ReviewCard = ({ review }) => {
       </View>
     </View>);
 };
-const MapPlaceholder = ({ onPressDirections }) => (<View style={styles.mapPlaceholderContainer}>
-    <Image source={{ uri: "https://via.placeholder.com/400x200.png?text=Mapa+Aqui" }} style={styles.mapPlaceholderImage}/>
-    <TouchableOpacity style={styles.mapDirectionsButton} onPress={onPressDirections}>
-      <Ionicons name="navigate" size={20} color={colors.surface}/>
-    </TouchableOpacity>
-  </View>);
+const LocationMap = ({ coordinates, name, onPressDirections }) => {
+    if (!coordinates || coordinates.latitude == null || coordinates.longitude == null) {
+        return null;
+    }
+    const region = {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+    };
+    return (<View style={styles.mapPlaceholderContainer}>
+      <MapView style={styles.mapView} region={region} scrollEnabled={false} pitchEnabled={false} rotateEnabled={false} toolbarEnabled={false} zoomControlEnabled={false} liteMode={Platform.OS === "android"}>
+        <Marker coordinate={coordinates} title={name}/>
+      </MapView>
+      <TouchableOpacity style={styles.mapDirectionsButton} onPress={onPressDirections}>
+        <Ionicons name="navigate" size={20} color={colors.surface}/>
+      </TouchableOpacity>
+    </View>);
+};
 const OpeningHoursSection = ({ hours }) => (<View style={styles.hoursContainer}>
     {hours.map((item, index) => (<View key={index} style={styles.hourRow}>
         {index === 0 && (<Ionicons name="time-outline" size={18} color={colors.textSecondary} style={styles.hourIcon}/>)}
@@ -101,7 +116,6 @@ const PlaceDetailScreen = ({ route, navigation }) => {
                 api.get(`/places/${placeId}/ratings`),
                 api.get(`/saved-places/${placeId}`).catch(() => ({ data: { saved: false } })),
             ]);
-            console.log(detailsResponse.data);
             setPlace(detailsResponse.data);
             setRatingsData(ratingsResponse.data);
             const savedStatus = savedResponse?.data?.saved ?? detailsResponse.data.isSaved;
@@ -162,8 +176,56 @@ const PlaceDetailScreen = ({ route, navigation }) => {
         });
     };
     const handleCopyAddress = async () => {
+        if (!place?.address)
+            return;
+        try {
+            await Clipboard.setStringAsync(place.address);
+            showSuccessNotification("Endereço copiado", undefined, {
+                position: "bottom",
+            });
+        }
+        catch (e) {
+            console.error("Erro ao copiar endereço:", e);
+            showErrorNotification("Erro", "Não foi possível copiar o endereço.", {
+                position: "bottom",
+            });
+        }
     };
     const handleGetDirections = () => {
+        if (!place)
+            return;
+        const lat = place.coordinates?.latitude;
+        const lng = place.coordinates?.longitude;
+        const hasCoords = typeof lat === "number" && typeof lng === "number";
+        const encodedName = encodeURIComponent(place.name || "Destino");
+        if (hasCoords) {
+            const url = Platform.OS === "ios"
+                ? `http://maps.apple.com/?ll=${lat},${lng}&q=${encodedName}`
+                : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+            Linking.openURL(url).catch((err) => {
+                console.error("Erro ao abrir mapas:", err);
+                showErrorNotification("Erro", "Não foi possível abrir o app de mapas.", {
+                    position: "bottom",
+                });
+            });
+            return;
+        }
+        if (place.address) {
+            const encodedAddress = encodeURIComponent(place.address);
+            const url = Platform.OS === "ios"
+                ? `http://maps.apple.com/?q=${encodedAddress}`
+                : `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+            Linking.openURL(url).catch((err) => {
+                console.error("Erro ao abrir mapas:", err);
+                showErrorNotification("Erro", "Não foi possível abrir o app de mapas.", {
+                    position: "bottom",
+                });
+            });
+            return;
+        }
+        showErrorNotification("Erro", "Não foi possível determinar a localização do lugar.", {
+            position: "bottom",
+        });
     };
     if (loading) {
         return (<View style={styles.centered}>
@@ -185,9 +247,7 @@ const PlaceDetailScreen = ({ route, navigation }) => {
     const { overall, totalReviews, food, service, ambiance, friendsRating } = ratingsData;
     return (<View style={styles.container}>
       <View style={styles.topBar}>
-        <TouchableOpacity style={styles.topBarButton} onPress={() => navigation.goBack()} activeOpacity={0.85}>
-          <Ionicons name="arrow-back" size={22} color={colors.textPrimary}/>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.topBarButton} />
         <View style={styles.topBarRight}>
           <TouchableOpacity style={styles.topBarButton} onPress={toggleSaved} disabled={saving} activeOpacity={0.85}>
             <Ionicons name={isSaved ? "bookmark" : "bookmark-outline"} size={22} color={colors.textPrimary}/>
@@ -235,9 +295,11 @@ const PlaceDetailScreen = ({ route, navigation }) => {
             </View>)}
           {place.address && (<View style={styles.infoRow}>
               <Ionicons name="location-outline" size={18} color={colors.textSecondary} style={styles.infoIcon}/>
-              <AppText style={styles.infoTextAddress} numberOfLines={2}>
-                {place.address}
-              </AppText>
+              <TouchableOpacity style={{ flex: 1 }} onPress={handleCopyAddress} activeOpacity={0.7}>
+                <AppText style={styles.infoTextAddress} numberOfLines={2}>
+                  {place.address}
+                </AppText>
+              </TouchableOpacity>
               {place.distanceInKm != null && (<View style={styles.distanceContainer}>
                   <Ionicons name="walk-outline" size={16} color={colors.primary} style={{ marginRight: 2 }}/>
                   <AppText weight="bold" style={styles.distanceText}>
@@ -274,7 +336,7 @@ const PlaceDetailScreen = ({ route, navigation }) => {
           <AppText weight="bold" style={styles.sectionTitle}>
             Localização
           </AppText>
-          <MapPlaceholder onPressDirections={handleGetDirections}/>
+          <LocationMap coordinates={place.coordinates} name={place.name} onPressDirections={handleGetDirections}/>
 
           <AppText weight="bold" style={styles.sectionTitle}>
             Horário de Funcionamento

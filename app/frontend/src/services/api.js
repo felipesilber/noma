@@ -17,7 +17,7 @@ async function wakeUpBackend() {
   try {
     await fetch(`${API_BASE_URL}/health`, { method: "GET" });
   } catch (err) {
-    console.log("Render ainda acordando...");
+    console.log("Render still loading...");
   }
 }
 

@@ -1,31 +1,148 @@
-import React from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView } from "react-native";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  FlatList,
+  Image,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
-const ExploreCard = ({ imageSource, title, subtitle, onPress }) => (<TouchableOpacity style={styles.cardContainer} onPress={onPress} activeOpacity={0.8}>
-    <Image source={imageSource} style={styles.cardImage} resizeMode="cover"/>
-    <View style={styles.cardContent}>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardSubtitle}>{subtitle}</Text>
+import api from "../../../../services/api";
+
+const PlaceResultCard = ({ item, onPress }) => (
+  <TouchableOpacity
+    style={styles.card}
+    activeOpacity={0.7}
+    onPress={onPress}
+  >
+    <Image
+      source={{
+        uri:
+          item.image ||
+          item.imageUrl ||
+          "https://via.placeholder.com/100/D9D9D9/000000?text=Foto",
+      }}
+      style={styles.cardImage}
+    />
+    <View style={styles.cardInfo}>
+      <Text numberOfLines={1} style={styles.cardTitle}>
+        {item.name}
+      </Text>
+      {!!item.address && (
+        <Text numberOfLines={1} style={styles.cardAddress}>
+          {item.address}
+        </Text>
+      )}
     </View>
-  </TouchableOpacity>);
-const ExploreLandingScreen = ({ navigation }) => {
-    const tabBarHeight = useBottomTabBarHeight();
-    const PADDING_BOTTOM = tabBarHeight + 25 + 20;
-    const handleExplorePlaces = () => {
-        navigation.navigate("ExploreCategories");
-    };
-    const handleExplorePeople = () => {
-        console.log("Navigate to Explore People");
-        alert("Tela 'Explorar Pessoas' ainda não implementada.");
-    };
-    return (<ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }} showsVerticalScrollIndicator={false}>
-      <Text style={styles.mainTitle}>O que você quer explorar?</Text>
+  </TouchableOpacity>
+);
 
-      <ExploreCard imageSource={require("../../../../../assets/images/explore-places.png")} title="Explorar Lugares" subtitle="Descubra novos restaurantes, bares e cafés perto de você." onPress={handleExplorePlaces}/>
+const ExploreSearchScreen = ({ navigation }) => {
+  const [q, setQ] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState(null);
+  const [results, setResults] = useState([]);
+  const debRef = useRef(null);
 
-      <ExploreCard imageSource={require("../../../../../assets/images/explore-people.png")} title="Explorar Pessoas" subtitle="Conecte-se com outros entusiastas de comida e bebida." onPress={handleExplorePeople}/>
-    </ScrollView>);
+  useEffect(() => {
+    if (debRef.current) clearTimeout(debRef.current);
+    const term = q.trim();
+    if (term.length < 2) {
+      setResults([]);
+      setErr(null);
+      return;
+    }
+    debRef.current = setTimeout(() => {
+      fetchResults(term);
+    }, 300);
+    return () => clearTimeout(debRef.current);
+  }, [q]);
+
+  const fetchResults = async (term) => {
+    try {
+      setErr(null);
+      setLoading(true);
+      const { data } = await api.get("/places/search", {
+        params: { q: term, limit: 20 },
+      });
+      setResults(data);
+    } catch (e) {
+      setErr("Não foi possível buscar.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSelectPlace = (place) => {
+    navigation.navigate("PlaceDetail", { placeId: place.id });
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <View style={styles.searchBar}>
+          <Ionicons
+            name="search"
+            size={18}
+            color={colors.textSecondary}
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Buscar restaurante..."
+            placeholderTextColor={colors.textSecondary}
+            value={q}
+            onChangeText={setQ}
+            returnKeyType="search"
+            autoFocus={true}
+          />
+          {!!q && (
+            <TouchableOpacity onPress={() => setQ("")}>
+              <Ionicons
+                name="close-circle"
+                size={18}
+                color={colors.textSecondary}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {loading ? (
+        <View style={styles.centerBox}>
+          <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : err ? (
+        <View style={styles.centerBox}>
+          <Text style={styles.hintText}>{err}</Text>
+        </View>
+      ) : q.trim().length < 2 ? (
+        <View style={styles.centerBox}>
+          <Text style={styles.hintText}>Digite pelo menos 2 caracteres…</Text>
+        </View>
+      ) : results.length === 0 ? (
+        <View style={styles.centerBox}>
+          <Text style={styles.hintText}>Nenhum lugar encontrado.</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={results}
+          keyExtractor={(it) => String(it.id)}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <PlaceResultCard
+              item={item}
+              onPress={() => handleSelectPlace(item)}
+            />
+          )}
+        />
+      )}
+    </View>
+  );
 };
-export default ExploreLandingScreen;
+
+export default ExploreSearchScreen;

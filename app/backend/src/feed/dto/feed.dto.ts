@@ -6,6 +6,7 @@ export class PlaceSummaryDto {
     category: string;
     distanceInKm: number;
     tag?: string;
+    friendsReviewsCount?: number;
 }
 export class FriendActivityDto {
     user: {

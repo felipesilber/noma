@@ -28,33 +28,55 @@ const Section = ({ title, children }) => (<View style={styles.sectionContainer}>
     </AppText>
     {children}
   </View>);
-const DestaqueCard = ({ item, onPress }) => (<TouchableOpacity style={styles.destaqueCardContainer} onPress={onPress}>
-    <Image source={{ uri: item.imagem }} style={styles.destaqueImage}/>
-    <AppText weight="bold" style={styles.destaqueTitle}>
-      {item.nome}
-    </AppText>
-    <View style={styles.ratingContainer}>
-      <AppText style={styles.destaqueSubtitle}>{item.avaliacao}</AppText>
-      <Ionicons name="star" size={14} color={colors.textSecondary} style={styles.starIcon}/>
-      <AppText style={styles.destaqueSubtitle}>∙ {item.categoria}</AppText>
-    </View>
-  </TouchableOpacity>);
-const RecomendadoCard = ({ item, onPress }) => (<TouchableOpacity style={styles.cardRow} onPress={onPress}>
-    <View style={styles.cardInfo}>
-      {item.tag && (<AppText weight="bold" style={styles.recomendadoTag}>
-          {item.tag}
-        </AppText>)}
-      <AppText weight="bold" style={styles.cardTitle}>
+const DestaqueCard = ({ item, onPress }) => {
+    const friends = item.friendsReviewsCount || 0;
+    return (<TouchableOpacity style={styles.destaqueCardContainer} onPress={onPress}>
+      <Image source={{ uri: item.imagem }} style={styles.destaqueImage}/>
+      <AppText weight="bold" style={styles.destaqueTitle}>
         {item.nome}
       </AppText>
       <View style={styles.ratingContainer}>
-        <AppText style={styles.cardSubtitle}>{item.avaliacao}</AppText>
+        <AppText style={styles.destaqueSubtitle}>{item.avaliacao}</AppText>
         <Ionicons name="star" size={14} color={colors.textSecondary} style={styles.starIcon}/>
-        <AppText style={styles.cardSubtitle}>∙ {item.categoria}</AppText>
+        <AppText style={styles.destaqueSubtitle}>∙ {item.categoria}</AppText>
       </View>
-    </View>
-    <Image source={{ uri: item.imagem }} style={styles.cardImageSmall}/>
-  </TouchableOpacity>);
+      {friends > 0 && (<View style={styles.friendsRow}>
+          <Ionicons name="person-outline" size={14} color={colors.primary} style={styles.friendsIcon}/>
+          <AppText style={styles.friendsText}>
+            {friends === 1
+                ? "1 amigo avaliou aqui"
+                : `${friends} amigos avaliaram aqui`}
+          </AppText>
+        </View>)}
+    </TouchableOpacity>);
+};
+const RecomendadoCard = ({ item, onPress }) => {
+    const friends = item.friendsReviewsCount || 0;
+    return (<TouchableOpacity style={styles.cardRow} onPress={onPress}>
+      <View style={styles.cardInfo}>
+        {item.tag && (<AppText weight="bold" style={styles.recomendadoTag}>
+            {item.tag}
+          </AppText>)}
+        <AppText weight="bold" style={styles.cardTitle}>
+          {item.nome}
+        </AppText>
+        <View style={styles.ratingContainer}>
+          <AppText style={styles.cardSubtitle}>{item.avaliacao}</AppText>
+          <Ionicons name="star" size={14} color={colors.textSecondary} style={styles.starIcon}/>
+          <AppText style={styles.cardSubtitle}>∙ {item.categoria}</AppText>
+        </View>
+        {friends > 0 && (<View style={styles.friendsRow}>
+            <Ionicons name="person-outline" size={14} color={colors.primary} style={styles.friendsIcon}/>
+            <AppText style={styles.friendsText}>
+              {friends === 1
+                ? "1 amigo avaliou aqui"
+                : `${friends} amigos avaliaram aqui`}
+            </AppText>
+          </View>)}
+      </View>
+      <Image source={{ uri: item.imagem }} style={styles.cardImageSmall}/>
+    </TouchableOpacity>);
+};
 const AmigoActivityCard = ({ item }) => (<TouchableOpacity style={styles.cardRow}>
     <Image source={{ uri: item.avatar }} style={styles.avatar}/>
     <View style={styles.cardInfo}>
@@ -145,6 +167,7 @@ const HomeScreen = ({ navigation }) => {
                     imagem: item.imageUrl,
                     avaliacao: item.avgRating,
                     categoria: item.category,
+                    friendsReviewsCount: item.friendsReviewsCount,
                 }} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>))}
             </ScrollView>
           </Section>)}
@@ -157,6 +180,7 @@ const HomeScreen = ({ navigation }) => {
                     avaliacao: item.avgRating,
                     categoria: item.category,
                     tag: item.tag,
+                    friendsReviewsCount: item.friendsReviewsCount,
                 }} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>))}
             </View>
           </Section>)}

@@ -89,6 +89,18 @@ export default StyleSheet.create({
     starIcon: {
         marginHorizontal: 4,
     },
+    friendsRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 4,
+    },
+    friendsIcon: {
+        marginRight: 4,
+    },
+    friendsText: {
+        fontSize: 12,
+        color: colors.primary,
+    },
     placeImage: {
         width: 80,
         height: 80,

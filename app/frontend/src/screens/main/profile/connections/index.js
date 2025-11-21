@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, TouchableOpacity, ActivityIndicator, FlatList, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
@@ -86,7 +87,7 @@ const ConnectionsScreen = ({ route, navigation }) => {
                 revert();
         }
     };
-    return (<View style={styles.container}>
+    return (<SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.headerBar}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
           <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
@@ -106,6 +107,6 @@ const ConnectionsScreen = ({ route, navigation }) => {
       </View>
 
       {loading ? (<View style={styles.centered}><ActivityIndicator color={colors.primary}/></View>) : error ? (<View style={styles.centered}><ErrorView message={error} onRetry={fetchData} /></View>) : (<FlatList data={data} keyExtractor={(item) => String(item.id)} renderItem={({ item }) => (<UserRow user={item} onToggleFollow={onToggleFollow} onPress={() => navigation.navigate("UserProfile", { userId: item.id })}/>)} contentContainerStyle={{ paddingBottom: 24 }}/>)}
-    </View>);
+    </SafeAreaView>);
 };
 export default ConnectionsScreen;

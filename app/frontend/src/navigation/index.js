@@ -30,6 +30,7 @@ import AddFavoriteScreen from "../screens/main/profile/add-favorite";
 import EditFavoritesScreen from "../screens/main/profile/edit-favorites";
 import EditListsScreen from "../screens/main/profile/edit-lists";
 import ConnectionsScreen from "../screens/main/profile/connections";
+import BackButton from "../components/BackButton";
 const AuthStack = createNativeStackNavigator();
 const MainTab = createBottomTabNavigator();
 const RootStack = createNativeStackNavigator();
@@ -101,11 +102,9 @@ const ExploreFlow = () => (<ExploreStack.Navigator initialRouteName="ExploreLand
     <ExploreStack.Screen name="ExploreCategories" component={ExploreCategoryScreen} options={{ title: "Explorar Lugares", headerBackTitleVisible: false }}/>
     <ExploreStack.Screen name="ExplorePeople" component={ExplorePeopleScreen} options={({ navigation }) => ({
         title: "Explorar Pessoas",
-        headerLeft: () => (<TouchableOpacity style={{ paddingHorizontal: 12 }} onPress={() => navigation.canGoBack()
+        headerLeft: () => (<BackButton onPress={() => navigation.canGoBack()
                 ? navigation.goBack()
-                : navigation.navigate("ExploreLanding")}>
-            <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
-          </TouchableOpacity>),
+                : navigation.navigate("ExploreLanding")}/>),
     })}/>
     <ExploreStack.Screen name="PlaceDetail" component={PlaceDetailScreen} options={{ headerShown: false }}/>
     <ExploreStack.Screen name="PlaceAllReviews" component={AllReviewsScreen} options={{ headerShown: false }}/>

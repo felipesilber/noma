@@ -2,13 +2,14 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException,
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
+import { UserService } from '../user/user.service';
 @Injectable()
 export class ListService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService, private userService: UserService) { }
     async createList(userId: number, dto: CreateListDto) {
         const { placeIds, ...listData } = dto;
-        return this.prisma.$transaction(async (prisma) => {
-            const list = await prisma.list.create({
+        const list = await this.prisma.$transaction(async (prisma) => {
+            const created = await prisma.list.create({
                 data: {
                     userId,
                     name: listData.name,
@@ -31,11 +32,14 @@ export class ListService {
                 data: {
                     type: 'CREATED_LIST',
                     userId,
-                    listId: list.id,
+                    listId: created.id,
                 },
             });
-            return list;
+            return created;
         });
+        // XP: +20 por lista criada
+        this.userService.addXp(userId, 20).catch(() => { });
+        return list;
     }
     async getMyLists(userId: number) {
         return this.prisma.list.findMany({

@@ -5,6 +5,7 @@ import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
 import ErrorView from "../../../../components/ErrorView";
+import BackButton from "../../../../components/BackButton";
 const AddReviewSearchScreen = ({ navigation }) => {
     const [searchText, setSearchText] = useState("");
     const [results, setResults] = useState([]);
@@ -57,9 +58,7 @@ const AddReviewSearchScreen = ({ navigation }) => {
       </View>
     </TouchableOpacity>);
     return (<SafeAreaView style={styles.container}>
-      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()} hitSlop={8}>
-        <Ionicons name="arrow-back" size={26} color={colors.textPrimary}/>
-      </TouchableOpacity>
+      <BackButton onPress={() => navigation.goBack()} style={styles.closeButton} />
 
       <View style={styles.searchBarContainer}>
         <Ionicons name="search" size={18} color={colors.textSecondary} style={styles.searchIcon}/>

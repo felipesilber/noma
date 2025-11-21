@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     color: "#FFF",
     textAlign: "center",
     marginBottom: 16,
-    fontSize: 16,
+    fontSize: 18,
   },
   button: {
     backgroundColor: colors.primary,
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: colors.textPrimary,
-    fontSize: 14,
+    fontSize: 16,
   },
 });
 
