@@ -69,6 +69,33 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: colors.textPrimary,
     },
+    avatarOptionsMenu: {
+        position: "absolute",
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: colors.surface,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        paddingVertical: 16,
+        paddingHorizontal: PADDING,
+        borderTopWidth: 1,
+        borderColor: "#2d3444",
+        zIndex: 20,
+        gap: 4,
+    },
+    avatarOptionButton: {
+        paddingVertical: 10,
+    },
+    avatarOptionText: {
+        fontSize: 14,
+        color: colors.textPrimary,
+        textAlign: "center",
+    },
+    avatarOptionTextRemove: {
+        color: colors.error,
+        fontWeight: "600",
+    },
     profileInfoContainer: {
         alignItems: "center",
         padding: PADDING,

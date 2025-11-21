@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, RefreshControl, } from "react-native";
+import { View, ScrollView, TouchableOpacity, ActivityIndicator, Image, FlatList, RefreshControl, Modal, } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
@@ -81,6 +81,7 @@ const ProfileScreen = ({ navigation, route }) => {
     const isOwnProfile = !viewedUserId;
     const [refreshing, setRefreshing] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    const [showAvatarOptions, setShowAvatarOptions] = useState(false);
     const fetchProfile = useCallback(async () => {
         try {
             if (!refreshing) {
@@ -185,15 +186,6 @@ const ProfileScreen = ({ navigation, route }) => {
             // 2) Faz upload direto para o S3
             const response = await fetch(uri);
             const blob = await response.blob();
-            await fetch(uploadUrl, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": contentType,
-                },
-                body: blob,
-            });
-            // app/frontend/src/screens/main/profile/index.js
-
             const uploadResponse = await fetch(uploadUrl, {
               method: "PUT",
               headers: {
@@ -207,21 +199,60 @@ const ProfileScreen = ({ navigation, route }) => {
               console.log("S3 upload failed", uploadResponse.status, errorText);
               showErrorNotification(
                 "Erro no upload",
-                "Não foi possível enviar a imagem para o servidor."
+                "Não foi possível enviar a imagem para o servidor.",
+                { position: "bottom" }
               );
               throw new Error(`S3 upload failed: ${uploadResponse.status}`);
             }
             // 3) Atualiza avatar no backend
             await api.put("/profile/avatar", { avatarUrl: fileUrl });
             setProfileData((prev) => (prev ? { ...prev, avatarUrl: fileUrl } : prev));
-            showSuccessNotification("Foto atualizada", "Sua foto de perfil foi alterada com sucesso.");
+            showSuccessNotification(
+              "Foto atualizada",
+              "Sua foto de perfil foi alterada com sucesso.",
+              { position: "bottom" }
+            );
         }
         catch (e) {
             console.error("Erro ao atualizar avatar:", e);
-            showErrorNotification("Erro", "Não foi possível atualizar sua foto de perfil.");
+            // Se já mostramos erro específico de upload, evitamos mensagem duplicada
+            if (!(e instanceof Error && e.message.startsWith("S3 upload failed"))) {
+                showErrorNotification(
+                  "Erro",
+                  "Não foi possível atualizar sua foto de perfil.",
+                  { position: "bottom" }
+                );
+            }
         }
         finally {
             setUploadingAvatar(false);
+            setShowAvatarOptions(false);
+        }
+    };
+    const handleRemoveAvatar = async () => {
+        if (!isOwnProfile || uploadingAvatar)
+            return;
+        try {
+            setUploadingAvatar(true);
+            await api.delete("/profile/avatar");
+            setProfileData((prev) => (prev ? { ...prev, avatarUrl: null } : prev));
+            showSuccessNotification(
+              "Foto removida",
+              "Sua foto de perfil foi removida.",
+              { position: "bottom" }
+            );
+        }
+        catch (e) {
+            console.error("Erro ao remover avatar:", e);
+            showErrorNotification(
+              "Erro",
+              "Não foi possível remover sua foto de perfil.",
+              { position: "bottom" }
+            );
+        }
+        finally {
+            setUploadingAvatar(false);
+            setShowAvatarOptions(false);
         }
     };
     const handleLogout = async () => {
@@ -280,6 +311,23 @@ const ProfileScreen = ({ navigation, route }) => {
     const favoritePlaces = carousels?.favoritePlaces || [];
     const userLists = carousels?.userLists || [];
     return (<SafeAreaView edges={["top"]} style={styles.container}>
+      <Modal transparent animationType="slide" visible={isOwnProfile && showAvatarOptions} onRequestClose={() => setShowAvatarOptions(false)}>
+        <View style={{ flex: 1 }}>
+          <TouchableOpacity style={styles.settingsBackdrop} activeOpacity={1} onPress={() => setShowAvatarOptions(false)}/>
+          <View style={styles.avatarOptionsMenu}>
+            <TouchableOpacity style={styles.avatarOptionButton} onPress={handleChangeAvatar} disabled={uploadingAvatar}>
+              <AppText style={styles.avatarOptionText}>
+                Escolher foto
+              </AppText>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.avatarOptionButton} onPress={handleRemoveAvatar} disabled={uploadingAvatar}>
+              <AppText style={[styles.avatarOptionText, styles.avatarOptionTextRemove]}>
+                Remover foto
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <View style={styles.header}>
         {!isOwnProfile && (
           <BackButton onPress={() => navigation.goBack()} style={styles.headerLeftIcon} />
@@ -311,7 +359,7 @@ const ProfileScreen = ({ navigation, route }) => {
         <View style={styles.profileInfoContainer}>
           <TouchableOpacity
             disabled={!isOwnProfile || uploadingAvatar}
-            onPress={handleChangeAvatar}
+            onPress={() => setShowAvatarOptions(true)}
             activeOpacity={0.8}
           >
             <Image source={{
