@@ -4,13 +4,14 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
 import AppText from "../../../components/text";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebase/firebase";
-import { showErrorNotification } from "../../../utils/notifications";
+import { showErrorNotification, showSuccessNotification } from "../../../utils/notifications";
 const StatBox = ({ value, label, onPress }) => (<TouchableOpacity style={styles.statBox} onPress={onPress} activeOpacity={0.8}>
     <AppText weight="bold" style={styles.statBoxValue}>
       {value}
@@ -79,6 +80,7 @@ const ProfileScreen = ({ navigation, route }) => {
     const viewedUserId = route?.params?.userId ?? null;
     const isOwnProfile = !viewedUserId;
     const [refreshing, setRefreshing] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const fetchProfile = useCallback(async () => {
         try {
             if (!refreshing) {
@@ -151,6 +153,58 @@ const ProfileScreen = ({ navigation, route }) => {
             routes: [{ name: "Auth" }],
         });
     };
+    const handleChangeAvatar = async () => {
+        if (!isOwnProfile || uploadingAvatar)
+            return;
+        try {
+            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+            if (status !== "granted") {
+                showErrorNotification("Permissão necessária", "Precisamos de acesso à sua galeria para alterar a foto de perfil.");
+                return;
+            }
+            const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.8,
+            });
+            if (result.canceled)
+                return;
+            const asset = result.assets[0];
+            const uri = asset.uri;
+            const contentType = asset.mimeType || "image/jpeg";
+            setUploadingAvatar(true);
+            // 1) Pede URL pré-assinada
+            const uploadConfig = await api.post("/profile/avatar/upload-url", {
+                contentType,
+            });
+            const { uploadUrl, fileUrl } = uploadConfig.data || {};
+            if (!uploadUrl || !fileUrl) {
+                throw new Error("Resposta inválida ao gerar URL de upload.");
+            }
+            // 2) Faz upload direto para o S3
+            const response = await fetch(uri);
+            const blob = await response.blob();
+            await fetch(uploadUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": contentType,
+                },
+                body: blob,
+            });
+            // 3) Atualiza avatar no backend
+            await api.put("/profile/avatar", { avatarUrl: fileUrl });
+            setProfileData((prev) => (prev ? { ...prev, avatarUrl: fileUrl } : prev));
+            showSuccessNotification("Foto atualizada", "Sua foto de perfil foi alterada com sucesso.");
+        }
+        catch (e) {
+            console.error("Erro ao atualizar avatar:", e);
+            showErrorNotification("Erro", "Não foi possível atualizar sua foto de perfil.");
+        }
+        finally {
+            setUploadingAvatar(false);
+        }
+    };
     const handleLogout = async () => {
         if (!isOwnProfile || loggingOut)
             return;
@@ -208,9 +262,9 @@ const ProfileScreen = ({ navigation, route }) => {
     const userLists = carousels?.userLists || [];
     return (<SafeAreaView edges={["top"]} style={styles.container}>
       <View style={styles.header}>
-        {!isOwnProfile && (<TouchableOpacity style={styles.headerLeftIcon} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
-          </TouchableOpacity>)}
+        {!isOwnProfile && (
+          <BackButton onPress={() => navigation.goBack()} style={styles.headerLeftIcon} />
+        )}
         <AppText weight="bold" style={styles.headerTitle}>
           {headerTitle}
         </AppText>
@@ -236,7 +290,11 @@ const ProfileScreen = ({ navigation, route }) => {
                 fetchProfile();
             }} tintColor={colors.textSecondary}/> } contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }}>
         <View style={styles.profileInfoContainer}>
-          <TouchableOpacity>
+          <TouchableOpacity
+            disabled={!isOwnProfile || uploadingAvatar}
+            onPress={handleChangeAvatar}
+            activeOpacity={0.8}
+          >
             <Image source={{
             uri: avatarUrl ||
                 "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/male/512/20.jpg",

@@ -3,6 +3,7 @@ import { View, TouchableOpacity, ActivityIndicator, FlatList, Image } from "reac
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
+import BackButton from "../../../../components/BackButton";
 import colors from "../../../../theme/colors";
 import AppText from "../../../../components/text";
 import api from "../../../../services/api";
@@ -89,9 +90,7 @@ const ConnectionsScreen = ({ route, navigation }) => {
     };
     return (<SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.headerBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
-          <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.headerBack} />
         <AppText weight="bold" style={styles.headerTitle}>{headerUsername || ""}</AppText>
       </View>
 

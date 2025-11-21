@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, Image, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
+import BackButton from "../../../../../components/BackButton";
 import colors from "../../../../../theme/colors";
 import api from "../../../../../services/api";
 const PlaceResultCard = ({ item, onPress }) => (<TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={onPress}>
@@ -56,9 +57,7 @@ const AddPlaceToListScreen = ({ navigation }) => {
     };
     return (<View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors.textPrimary}/>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} />
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={colors.textSecondary} style={styles.searchIcon}/>
           <TextInput style={styles.searchInput} placeholder="Buscar restaurantes..." placeholderTextColor={colors.textSecondary} value={q} onChangeText={setQ} returnKeyType="search" autoFocus={true}/>

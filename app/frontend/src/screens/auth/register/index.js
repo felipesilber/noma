@@ -23,6 +23,8 @@ import api from "../../../services/api";
 import AppText from "../../../components/text";
 import * as SplashScreen from "expo-splash-screen";
 import BackButton from "../../../components/BackButton";
+import { Ionicons } from "@expo/vector-icons";
+
 const RegisterScreen = ({ navigation }) => {
   const [step, setStep] = useState(0);
   const [email, setEmail] = useState("");

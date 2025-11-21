@@ -6,6 +6,7 @@ import colors from "../../../../theme/colors";
 import AppText from "../../../../components/text";
 import api from "../../../../services/api";
 import styles from "./styles";
+import BackButton from "../../../../components/BackButton";
 import ErrorView from "../../../../components/ErrorView";
 
 const PlaceRow = ({ place, onPress }) => {
@@ -48,9 +49,7 @@ const UserPlacesScreen = ({ route, navigation }) => {
     }, [fetchData]);
     return (<SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.headerBar}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
-          <Ionicons name="chevron-back" size={24} color={colors.textPrimary}/>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.headerBack} />
         <AppText weight="bold" style={styles.headerTitle}>{title}</AppText>
       </View>
 

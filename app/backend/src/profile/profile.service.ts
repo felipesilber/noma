@@ -119,6 +119,18 @@ export class ProfileService {
         });
         return rows.map((r) => r.place);
     }
+    async updateAvatar(userId: number, avatarUrl: string) {
+        const user = await this.prisma.user.update({
+            where: { id: userId },
+            data: { avatarUrl },
+            select: {
+                id: true,
+                username: true,
+                avatarUrl: true,
+            },
+        });
+        return user;
+    }
     private async _getDashboardStats(userId: number) {
         const reviews = await this.prisma.review.findMany({
             where: { userId },

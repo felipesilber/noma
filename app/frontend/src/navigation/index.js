@@ -208,13 +208,28 @@ const AppNavigator = () => (<NavigationContainer theme={AppTheme}>
     <RootStack.Navigator initialRouteName="Auth" screenOptions={slideStackOptions}>
       <RootStack.Screen name="Auth" component={AuthStackScreens} options={{ headerShown: false }}/>
       <RootStack.Screen name="Main" component={MainTabs}/>
-      <RootStack.Screen name="PlaceDetail" component={PlaceDetailScreen}/>
+      <RootStack.Screen
+        name="PlaceDetail"
+        component={PlaceDetailScreen}
+        options={{ headerShown: false }}
+      />
       <RootStack.Screen name="PlaceAllReviews" component={AllReviewsScreen} options={{ headerShown: false }}/>
-      <RootStack.Screen name="ListDetail" component={ListDetailScreen} options={({ route }) => ({
-        headerShown: true,
-        title: route.params?.listName || "Lista",
-        headerShadowVisible: false,
-    })}/>
+      <RootStack.Screen
+        name="ListDetail"
+        component={ListDetailScreen}
+        options={({ route, navigation }) => ({
+          headerShown: true,
+          title: route.params?.listName || "Lista",
+          headerShadowVisible: false,
+          headerStyle: { backgroundColor: colors.background },
+          headerTintColor: colors.textPrimary,
+          headerTitleAlign: "center",
+          headerBackTitleVisible: false,
+          headerLeft: () => (
+            <BackButton onPress={() => navigation.goBack()} />
+          ),
+        })}
+      />
       <RootStack.Screen name="AddReviewFlow" component={AddReviewModalFlow} options={{
         presentation: "modal",
         headerShown: false,
