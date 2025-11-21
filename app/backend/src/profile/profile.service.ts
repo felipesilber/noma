@@ -19,6 +19,11 @@ export class ProfileService {
                 lists: {
                     take: 10,
                     orderBy: { createdAt: 'desc' },
+                    include: {
+                        _count: {
+                            select: { items: true },
+                        },
+                    },
                 },
             },
         });
@@ -89,6 +94,7 @@ export class ProfileService {
                     name: l.name,
                     imageUrl: l.imageUrl,
                     isRanking: l.isRanking,
+                    placesCount: l._count?.items ?? 0,
                 })),
             },
         };

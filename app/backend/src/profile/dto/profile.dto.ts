@@ -8,6 +8,7 @@ class UserListDto {
     name: string;
     imageUrl: string | null;
     isRanking: boolean;
+    placesCount: number;
 }
 export class UserProfileDto {
     id: number;

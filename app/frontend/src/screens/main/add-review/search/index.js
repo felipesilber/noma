@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, SafeAreaView, ActivityIndicator, } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, SafeAreaView, ActivityIndicator, ScrollView, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
 import ErrorView from "../../../../components/ErrorView";
 import BackButton from "../../../../components/BackButton";
+import PlaceSearchResultCard from "../../../../components/place/PlaceSearchResultCard";
 const AddReviewSearchScreen = ({ navigation }) => {
     const [searchText, setSearchText] = useState("");
     const [results, setResults] = useState([]);
@@ -43,20 +44,6 @@ const AddReviewSearchScreen = ({ navigation }) => {
             setLoading(false);
         }
     }
-    const SearchResultCard = ({ item }) => (<TouchableOpacity style={styles.searchResultCard} onPress={() => navigation.navigate("AddReviewForm", {
-            placeId: item.id,
-            placeName: item.name,
-            placeImage: item.imageUrl,
-        })} activeOpacity={0.85}>
-      <Image source={{
-            uri: item.imageUrl ||
-                "https://via.placeholder.com/100/D9D9D9/000000?text=Foto",
-        }} style={styles.searchResultImage}/>
-      <View style={styles.searchResultInfo}>
-        <Text style={styles.searchResultName}>{item.name}</Text>
-        {!!item.address && (<Text style={styles.searchResultAddress}>{item.address}</Text>)}
-      </View>
-    </TouchableOpacity>);
     return (<SafeAreaView style={styles.container}>
       <BackButton onPress={() => navigation.goBack()} style={styles.closeButton} />
 
@@ -66,7 +53,13 @@ const AddReviewSearchScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.mainContent}>
-        {loading ? (<ActivityIndicator color={colors.primary}/>) : erro ? (<ErrorView message={erro} onRetry={() => fetchPlaces(searchText)} />) : results.length > 0 ? (results.map((p) => <SearchResultCard key={p.id} item={p}/>)) : searchText.trim().length >= 2 ? (<Text style={styles.noResultsText}>
+        {loading ? (<ActivityIndicator color={colors.primary}/>) : erro ? (<ErrorView message={erro} onRetry={() => fetchPlaces(searchText)} />) : results.length > 0 ? (<ScrollView>
+              {results.map((p) => (<PlaceSearchResultCard key={p.id} item={p} onPress={() => navigation.navigate("AddReviewForm", {
+                    placeId: p.id,
+                    placeName: p.name,
+                    placeImage: p.image || p.imageUrl,
+                })}/>))}
+            </ScrollView>) : searchText.trim().length >= 2 ? (<Text style={styles.noResultsText}>
             Nenhum estabelecimento encontrado para “{searchText}”.
           </Text>) : (<Text style={styles.noResultsText}>
             Comece digitando (mínimo 2 caracteres)…

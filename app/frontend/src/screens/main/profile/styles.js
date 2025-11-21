@@ -240,8 +240,17 @@ const styles = StyleSheet.create({
         color: "#fff",
         flexShrink: 1,
     },
+    userListCardRight: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+    },
     userListCardIcon: {
         marginLeft: 4,
+    },
+    userListCardCount: {
+        fontSize: 14,
+        color: colors.textSecondary,
     },
     centered: {
         flex: 1,

@@ -1,21 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, Image, } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, FlatList, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
 import { showSuccessNotification, showErrorNotification, showInfoNotification } from "../../../../utils/notifications";
-const PlaceResultCard = ({ item, onPress }) => (<TouchableOpacity style={styles.card} activeOpacity={0.7} onPress={onPress}>
-    <Image source={{ uri: item.image }} style={styles.cardImage}/>
-    <View style={styles.cardInfo}>
-      <Text numberOfLines={1} style={styles.cardTitle}>
-        {item.name}
-      </Text>
-      <Text numberOfLines={1} style={styles.cardAddress}>
-        {item.address}
-      </Text>
-    </View>
-  </TouchableOpacity>);
+import PlaceSearchResultCard from "../../../../components/place/PlaceSearchResultCard";
 const AddFavoriteScreen = ({ navigation }) => {
     const [q, setQ] = useState("");
     const [loading, setLoading] = useState(false);
@@ -90,7 +80,10 @@ const AddFavoriteScreen = ({ navigation }) => {
           <Text style={styles.hintText}>Digite pelo menos 2 caracteres…</Text>
         </View>) : results.length === 0 ? (<View style={styles.centerBox}>
           <Text style={styles.hintText}>Nenhum lugar encontrado.</Text>
-        </View>) : (<FlatList data={results} keyExtractor={(it) => String(it.id)} contentContainerStyle={styles.listContent} renderItem={({ item }) => (<PlaceResultCard item={item} onPress={() => handleSelectPlace(item)}/>)}/>)}
+        </View>) : (<FlatList data={results} keyExtractor={(it) => String(it.id)} contentContainerStyle={styles.listContent} renderItem={({ item }) => (<PlaceSearchResultCard item={{
+                    ...item,
+                    image: item.image,
+                }} onPress={() => handleSelectPlace(item)}/>)}/>)}
     </View>);
 };
 export default AddFavoriteScreen;

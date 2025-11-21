@@ -6,40 +6,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
-  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
-
-const PlaceResultCard = ({ item, onPress }) => (
-  <TouchableOpacity
-    style={styles.card}
-    activeOpacity={0.7}
-    onPress={onPress}
-  >
-    <Image
-      source={{
-        uri:
-          item.image ||
-          item.imageUrl ||
-          "https://via.placeholder.com/100/D9D9D9/000000?text=Foto",
-      }}
-      style={styles.cardImage}
-    />
-    <View style={styles.cardInfo}>
-      <Text numberOfLines={1} style={styles.cardTitle}>
-        {item.name}
-      </Text>
-      {!!item.address && (
-        <Text numberOfLines={1} style={styles.cardAddress}>
-          {item.address}
-        </Text>
-      )}
-    </View>
-  </TouchableOpacity>
-);
+import PlaceSearchResultCard from "../../../../components/place/PlaceSearchResultCard";
 
 const ExploreSearchScreen = ({ navigation }) => {
   const [q, setQ] = useState("");
@@ -134,7 +106,7 @@ const ExploreSearchScreen = ({ navigation }) => {
           keyExtractor={(it) => String(it.id)}
           contentContainerStyle={styles.listContent}
           renderItem={({ item }) => (
-            <PlaceResultCard
+            <PlaceSearchResultCard
               item={item}
               onPress={() => handleSelectPlace(item)}
             />

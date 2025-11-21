@@ -40,14 +40,21 @@ const DashboardStatCard = ({ label, value }) => (<View style={styles.dashboardSt
       {value}
     </AppText>
   </View>);
-const UserListCard = ({ item, onPress }) => (<TouchableOpacity style={styles.userListCard} onPress={onPress} activeOpacity={0.8}>
-    <View style={styles.userListCardContent}>
-      <AppText weight="bold" style={styles.userListCardTitle} numberOfLines={1}>
-        {item.name}
-      </AppText>
-      {item.isRanking && (<Ionicons name="trophy-outline" size={18} color={colors.primary} style={styles.userListCardIcon}/>)} 
-    </View>
-  </TouchableOpacity>);
+const UserListCard = ({ item, onPress }) => {
+    const count = item.placesCount ?? 0;
+    const countLabel = `${count} ${count === 1 ? "lugar" : "lugares"}`;
+    return (<TouchableOpacity style={styles.userListCard} onPress={onPress} activeOpacity={0.8}>
+      <View style={styles.userListCardContent}>
+        <AppText weight="bold" style={styles.userListCardTitle} numberOfLines={1}>
+          {item.name}
+        </AppText>
+        <View style={styles.userListCardRight}>
+          {item.isRanking && (<Ionicons name="trophy-outline" size={18} color={colors.star} style={styles.userListCardIcon}/>)} 
+          <AppText style={styles.userListCardCount}>{countLabel}</AppText>
+        </View>
+      </View>
+    </TouchableOpacity>);
+};
 const Section = ({ title, children, actionIcon, onPressAction }) => (<View style={styles.sectionContainer}>
     <View style={styles.sectionHeader}>
       <AppText weight="bold" style={styles.sectionTitle}>
