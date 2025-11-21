@@ -163,7 +163,7 @@ const ProfileScreen = ({ navigation, route }) => {
                 return;
             }
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: [ImagePicker.MediaType.IMAGE],
+                mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsEditing: true,
                 aspect: [1, 1],
                 quality: 0.8,
@@ -192,6 +192,25 @@ const ProfileScreen = ({ navigation, route }) => {
                 },
                 body: blob,
             });
+            // app/frontend/src/screens/main/profile/index.js
+
+            const uploadResponse = await fetch(uploadUrl, {
+              method: "PUT",
+              headers: {
+                "Content-Type": contentType,
+              },
+              body: blob,
+            });
+
+            if (!uploadResponse.ok) {
+              const errorText = await uploadResponse.text();
+              console.log("S3 upload failed", uploadResponse.status, errorText);
+              showErrorNotification(
+                "Erro no upload",
+                "Não foi possível enviar a imagem para o servidor."
+              );
+              throw new Error(`S3 upload failed: ${uploadResponse.status}`);
+            }
             // 3) Atualiza avatar no backend
             await api.put("/profile/avatar", { avatarUrl: fileUrl });
             setProfileData((prev) => (prev ? { ...prev, avatarUrl: fileUrl } : prev));

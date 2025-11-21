@@ -6,10 +6,12 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 export class S3Service {
   private client: S3Client;
   private bucket: string;
+  private region: string;
 
   constructor() {
+    this.region = process.env.AWS_REGION || 'us-east-1';
     this.client = new S3Client({
-      region: process.env.AWS_REGION || 'us-east-1',
+      region: this.region,
       credentials:
         process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY
           ? {
@@ -27,6 +29,7 @@ export class S3Service {
 
   async getAvatarUploadUrl(userId: number, contentType: string) {
     if (!this.bucket) {
+      console.error('Bucket S3 não configurado. Defina AVATAR_BUCKET ou AWS_S3_BUCKET.');
       throw new Error(
         'Bucket S3 não configurado. Defina AVATAR_BUCKET ou AWS_S3_BUCKET.',
       );
@@ -38,13 +41,14 @@ export class S3Service {
       Bucket: this.bucket,
       Key: key,
       ContentType: contentType,
-      ACL: 'public-read',
+      // Não usamos ACL aqui para evitar erros em buckets com ACL desativado
     });
 
     const uploadUrl = await getSignedUrl(this.client, command, {
       expiresIn: 300,
     });
-    const fileUrl = `https://${this.bucket}.s3.amazonaws.com/${key}`;
+
+    const fileUrl = `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
 
     return { uploadUrl, fileUrl };
   }
