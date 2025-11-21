@@ -24,6 +24,20 @@ export default StyleSheet.create({
         borderRadius: 12,
         marginBottom: 16,
         backgroundColor: colors.divider,
+        overflow: "hidden",
+    },
+    listImageRow: {
+        flex: 1,
+        flexDirection: "row",
+    },
+    listImageCol: {
+        flex: 1,
+        flexDirection: "column",
+    },
+    listImageTile: {
+        flex: 1,
+        borderRadius: 0,
+        resizeMode: "cover",
     },
     listName: {
         fontSize: 24,

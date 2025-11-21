@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Alert, Linking, ActivityIndicator, StyleSheet, Platform, RefreshControl, } from "react-native";
-import MapView, { Marker } from "react-native-maps";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
@@ -12,6 +11,14 @@ import AppText from "../../../components/text";
 import { showErrorNotification, showSuccessNotification } from "../../../utils/notifications";
 import RatingsSummary from "./components/RatingsSummary";
 import BackButton from "../../../components/BackButton";
+let MapView;
+let Marker;
+if (Platform.OS !== "web") {
+    // Carrega react-native-maps apenas em plataformas nativas
+    const Maps = require("react-native-maps");
+    MapView = Maps.default;
+    Marker = Maps.Marker || Maps.default?.Marker;
+}
 function formatRating(v) {
     return typeof v === "number" && !Number.isNaN(v) ? String(v.toFixed(1)) : "-";
 }
@@ -48,6 +55,10 @@ const ReviewCard = ({ review }) => {
     </View>);
 };
 const LocationMap = ({ coordinates, name, onPressDirections }) => {
+    if (Platform.OS === "web" || !MapView || !Marker) {
+        // Evita usar react-native-maps na web; você pode colocar um placeholder aqui se quiser
+        return null;
+    }
     if (!coordinates || coordinates.latitude == null || coordinates.longitude == null) {
         return null;
     }
