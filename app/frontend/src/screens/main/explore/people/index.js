@@ -129,7 +129,7 @@ const ExplorePeopleScreen = ({ navigation }) => {
         try {
             setSearchError(null);
             setIsSearching(true);
-            const { data } = await api.get("/users/search", {
+            const { data } = await api.get("/user/search", {
                 params: { q: query, limit: 20 },
             });
             const mappedResults = data.map((user) => ({
@@ -204,16 +204,12 @@ const ExplorePeopleScreen = ({ navigation }) => {
         }
         return (<FlatList data={searchResults} keyExtractor={(item) => item.id.toString()} renderItem={({ item }) => (<UserCard user={item} onFollowToggle={handleFollowToggle} onPress={handleOpenProfile}/>)}/>);
     };
+    const isInitialMode = searchText.trim().length < 2;
+    const isRefreshingInitial = isInitialMode && (loadingPopular || loadingActive);
     return (<SafeAreaView edges={["top"]} style={{ flex: 1 }}>
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" refreshControl={<RefreshControl refreshing={loadingPopular || loadingActive || isSearching} onRefresh={() => {
-                if (searchText.trim().length >= 2) {
-                    setIsSearching(true);
-                    fetchUsers(searchText.trim()).finally(() => setIsSearching(false));
-                }
-                else {
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: PADDING_BOTTOM }} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" refreshControl={isInitialMode ? (<RefreshControl refreshing={isRefreshingInitial} onRefresh={() => {
                     fetchInitialData();
-                }
-            }} tintColor={colors.textSecondary}/>}>
+                }} tintColor={colors.textSecondary}/>) : undefined}>
       <View style={styles.searchBarContainer}>
         <Ionicons name="search-outline" size={20} color={colors.textSecondary} style={styles.searchIcon}/>
         <TextInput style={styles.searchInput} placeholder="Buscar por nome de usuário" placeholderTextColor={colors.textSecondary} value={searchText} onChangeText={setSearchText} autoFocus={false}/>

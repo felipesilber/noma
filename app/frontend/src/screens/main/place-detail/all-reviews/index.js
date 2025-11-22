@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, TouchableOpacity, ActivityIndicator, FlatList, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import RatingsSummary from "../components/RatingsSummary";
@@ -110,7 +111,8 @@ const AllReviewsScreen = ({ route, navigation }) => {
             setIsLoadingMore(false);
         }
     };
-    return (<View style={styles.container}>
+    const hasFriendsReviews = (counts.friends || 0) > 0;
+    return (<SafeAreaView style={styles.container} edges={["top"]}>
       <View style={styles.headerBar}>
         <BackButton onPress={() => navigation.goBack()} style={styles.headerBack} />
         <AppText weight="bold" style={styles.headerTitle}>Todas as Avaliações</AppText>
@@ -125,13 +127,13 @@ const AllReviewsScreen = ({ route, navigation }) => {
 
           <View style={styles.tabsRow}>
             <TabButton label={`Geral (${counts.all || 0})`} active={scope === "all"} onPress={() => handleChangeScope("all")}/>
-            <TabButton label={`Amigos (${counts.friends || 0})`} active={scope === "friends"} onPress={() => handleChangeScope("friends")}/>
+            {hasFriendsReviews && (<TabButton label={`Amigos (${counts.friends || 0})`} active={scope === "friends"} onPress={() => handleChangeScope("friends")}/>)}
           </View>
 
           <FlatList data={data} keyExtractor={(item) => String(item.id)} renderItem={({ item }) => <ReviewItem review={item}/>} onEndReachedThreshold={0.3} onEndReached={handleLoadMore} ListFooterComponent={isLoadingMore ? (<View style={{ paddingVertical: 16 }}>
                 <ActivityIndicator color={colors.primary}/>
               </View>) : null} contentContainerStyle={{ paddingBottom: 24 }}/>
-        </>)}
-    </View>);
+        </>)} 
+    </SafeAreaView>);
 };
 export default AllReviewsScreen;

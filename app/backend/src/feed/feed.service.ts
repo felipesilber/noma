@@ -24,8 +24,12 @@ export class FeedService {
             orderBy: { createdAt: 'desc' },
             include: { category: true },
         });
-        const friendsCountMap = await this._getFriendsReviewsCount(userId, places.map((p) => p.id));
-        return places.map((p) => this._toPlaceSummaryDto(p, friendsCountMap.get(p.id) || 0));
+        const ids = places.map((p) => p.id);
+        const [friendsCountMap, ratingMap] = await Promise.all([
+            this._getFriendsReviewsCount(userId, ids),
+            this._getAvgRatingsForPlaceIds(ids),
+        ]);
+        return places.map((p) => this._toPlaceSummaryDto(p, friendsCountMap.get(p.id) || 0, ratingMap.get(p.id)));
     }
     private async _getRecommendedPlaces(userId: number): Promise<PlaceSummaryDto[]> {
         const topCategory = await this.prisma.review.groupBy({
@@ -41,8 +45,12 @@ export class FeedService {
             take: 5,
             include: { category: true },
         });
-        const friendsCountMap = await this._getFriendsReviewsCount(userId, places.map((p) => p.id));
-        return places.map((p) => this._toPlaceSummaryDto(p, friendsCountMap.get(p.id) || 0));
+        const ids = places.map((p) => p.id);
+        const [friendsCountMap, ratingMap] = await Promise.all([
+            this._getFriendsReviewsCount(userId, ids),
+            this._getAvgRatingsForPlaceIds(ids),
+        ]);
+        return places.map((p) => this._toPlaceSummaryDto(p, friendsCountMap.get(p.id) || 0, ratingMap.get(p.id)));
     }
     private async _getFriendActivityPreview(userId: number) {
         const following = await this.prisma.follow.findMany({
@@ -140,12 +148,23 @@ export class FeedService {
         }
         return counts;
     }
-    private _toPlaceSummaryDto(place: any, friendsReviewsCount = 0): PlaceSummaryDto {
+    private async _getAvgRatingsForPlaceIds(placeIds: number[]): Promise<Map<number, number | null>> {
+        if (!placeIds.length)
+            return new Map();
+        const avgRatings = await this.prisma.review.groupBy({
+            by: ['placeId'],
+            where: { placeId: { in: placeIds } },
+            _avg: { generalRating: true },
+            orderBy: { placeId: 'asc' },
+        });
+        return new Map(avgRatings.map((r) => [r.placeId, r._avg.generalRating]));
+    }
+    private _toPlaceSummaryDto(place: any, friendsReviewsCount = 0, avgRating?: number | null): PlaceSummaryDto {
         return {
             id: place.id,
             name: place.name,
             imageUrl: place.imageUrl,
-            avgRating: 4.5,
+            avgRating: avgRating ? parseFloat(avgRating.toFixed(1)) : 0,
             category: place.category.name,
             distanceInKm: 1.2,
             tag: place.tag,

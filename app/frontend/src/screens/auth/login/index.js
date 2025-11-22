@@ -66,14 +66,6 @@ const LoginScreen = ({ navigation }) => {
                   Continuar com Google
                 </AppText>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton}>
-                <View style={styles.facebookIconContainer}>
-                  <Ionicons name="logo-facebook" size={14} color="#FFF"/>
-                </View>
-                <AppText weight="medium" style={styles.socialButtonText}>
-                  Continuar com Facebook
-                </AppText>
-              </TouchableOpacity>
 
               <AppText style={styles.separator}>ou</AppText>
 
