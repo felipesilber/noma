@@ -20,6 +20,7 @@ export default StyleSheet.create({
     },
     scrollContent: {
         flexGrow: 1,
+        paddingBottom: 40,
     },
     contentContainer: {
         justifyContent: "flex-start",

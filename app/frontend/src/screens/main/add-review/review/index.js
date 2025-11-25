@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Modal, } from "react-native";
+import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, ActivityIndicator, Platform, Modal, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import styles from "./styles";
@@ -156,8 +156,14 @@ const AddReviewFormScreen = ({ route, navigation }) => {
         </View>
       </Modal>);
     };
-    return (<KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+    return (<View style={styles.container}>
+      <ScrollView 
+        contentContainerStyle={styles.scrollViewContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        keyboardDismissMode="interactive"
+      >
         <View style={styles.imageContainer}>
           <Image source={{ uri: placeImage }} style={styles.placeImage}/>
           <View style={styles.placeNameOverlay}>
@@ -220,6 +226,6 @@ const AddReviewFormScreen = ({ route, navigation }) => {
           {submitting ? (<ActivityIndicator color={colors.background}/>) : (<Text style={styles.publishButtonText}>Publicar</Text>)}
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>);
+    </View>);
 };
 export default AddReviewFormScreen;

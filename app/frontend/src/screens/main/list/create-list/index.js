@@ -58,7 +58,7 @@ const CreateListScreen = ({ navigation }) => {
                 description: description || null,
                 imageUrl: "https://picsum.photos/id/102/600/400",
                 placeIds: placeIds,
-                isRanking,
+                isRanking: isRanking,
             };
             await api.post("/lists", newList);
             showSuccessNotification("Lista criada", "Sua lista foi salva com sucesso.");
@@ -70,7 +70,7 @@ const CreateListScreen = ({ navigation }) => {
             console.error("Erro ao salvar lista:", err);
             showErrorNotification("Erro", "Não foi possível salvar a lista.");
         }
-    }, [listName, description, addedPlaces, navigation]);
+    }, [listName, description, addedPlaces, isRanking, navigation]);
     useEffect(() => {
         navigation.setOptions({
             headerTitle: "Criar Nova Lista",

@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, TouchableOpacity, FlatList, Image, ActivityIndicator, Alert, StyleSheet, Platform, } from "react-native";
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator, Alert, StyleSheet, Platform, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
 import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { showErrorNotification } from "../../../../utils/notifications";
+import ListCoverImage from "../../../main/list/components/ListCoverImage";
 const ListItemCard = ({ item, onEdit, onRemove }) => {
     const placeCount = item._count?.items || 0;
     return (<View style={styles.cardContainer}>
       <TouchableOpacity style={styles.cardInfo} onPress={onEdit}>
-        <Image source={{ uri: item.imageUrl }} style={styles.cardImage}/>
+        <ListCoverImage items={item.items} fallbackImageUrl={item.imageUrl} style={styles.cardImage}/>
         <View style={styles.cardTextContainer}>
           <Text style={styles.cardTitle}>{item.name}</Text>
           <Text style={styles.cardAddress}>

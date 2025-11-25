@@ -53,6 +53,15 @@ export class ListService {
                 createdAt: true,
                 updatedAt: true,
                 _count: { select: { items: true } },
+                items: {
+                    take: 3,
+                    orderBy: [{ order: 'asc' }, { addedAt: 'desc' }],
+                    include: {
+                        place: {
+                            select: { imageUrl: true },
+                        },
+                    },
+                },
             },
             orderBy: { updatedAt: 'desc' },
         });

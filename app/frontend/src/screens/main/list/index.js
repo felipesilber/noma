@@ -7,40 +7,7 @@ import colors from "../../../theme/colors";
 import moment from "moment";
 import "moment/locale/pt-br";
 import api from "../../../services/api";
-const ListCoverImage = ({ items, fallbackImageUrl }) => {
-    const images = (items || [])
-        .map((it) => it.place?.imageUrl)
-        .filter(Boolean);
-    if (!images.length && !fallbackImageUrl) {
-        return <View style={styles.listImage}/>;
-    }
-    if (!images.length && fallbackImageUrl) {
-        return (<Image source={{ uri: fallbackImageUrl }} style={styles.listImage}/>);
-    }
-    const [first, second, third] = images;
-    if (images.length === 1 || !second) {
-        return (<Image source={{ uri: first }} style={styles.listImage}/>);
-    }
-    if (images.length === 2 || !third) {
-        return (<View style={styles.listImage}>
-        <View style={styles.listImageRow}>
-          <Image source={{ uri: first }} style={[styles.listImageTile, { marginRight: 1 }]}/>
-          <Image source={{ uri: second }} style={[styles.listImageTile, { marginLeft: 1 }]}/>
-        </View>
-      </View>);
-    }
-    return (<View style={styles.listImage}>
-      <View style={styles.listImageRow}>
-        <View style={[styles.listImageCol, { marginRight: 1 }]}>
-          <Image source={{ uri: first }} style={[styles.listImageTile, { marginBottom: 1 }]}/>
-          <Image source={{ uri: second }} style={[styles.listImageTile, { marginTop: 1 }]}/>
-        </View>
-        <View style={[styles.listImageCol, { marginLeft: 1 }]}>
-          <Image source={{ uri: third }} style={styles.listImageTile}/>
-        </View>
-      </View>
-    </View>);
-};
+import ListCoverImage from "./components/ListCoverImage";
 const PlaceItem = ({ item, index, isRanking, onPress }) => {
     const place = item.place;
     const rating = place.rating || place.avgRating || 4.5;

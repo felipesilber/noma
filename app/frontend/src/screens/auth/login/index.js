@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, TouchableOpacity, SafeAreaView, ImageBackground, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator, Keyboard, TouchableWithoutFeedback, ScrollView } from "react-native";
+import { View, TouchableOpacity, SafeAreaView, ImageBackground, TextInput, Platform, ActivityIndicator, Keyboard, TouchableWithoutFeedback, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../../firebase/firebase";
@@ -42,7 +42,7 @@ const LoginScreen = ({ navigation }) => {
         }
     };
     return (<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container} keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}>
+    <View style={styles.container}>
       <ImageBackground source={require("../../../../assets/images/login-background.png")} resizeMode="cover" style={styles.background} blurRadius={0}>
         <View style={styles.overlay} pointerEvents="none"/>
         <SafeAreaView style={styles.safeArea}>
@@ -51,6 +51,7 @@ const LoginScreen = ({ navigation }) => {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             bounces={false}
+            keyboardDismissMode="interactive"
           >
             <View style={styles.contentContainer}>
               <View style={styles.header}>
@@ -96,7 +97,7 @@ const LoginScreen = ({ navigation }) => {
         </SafeAreaView>
       </ImageBackground>
       <ErrorModal visible={!!errorMsg} message={errorMsg || ""} onClose={() => setErrorMsg(null)}/>
-    </KeyboardAvoidingView>
+    </View>
     </TouchableWithoutFeedback>);
 };
 export default LoginScreen;
