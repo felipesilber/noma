@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, TouchableOpacity, ActivityIndicator, FlatList, Image } from "react-native";
+import { View, TouchableOpacity, ActivityIndicator, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import RatingsSummary from "../components/RatingsSummary";
 import colors from "../../../../theme/colors";
 import AppText from "../../../../components/text";
+import Avatar from "../../../../components/avatar";
 import api from "../../../../services/api";
 import BackButton from "../../../../components/BackButton";
 import moment from "moment";
@@ -13,10 +14,8 @@ import "moment/locale/pt-br";
 const ReviewItem = ({ review }) => {
     const timeAgo = useMemo(() => moment(review.createdAt).locale("pt-br").fromNow(), [review.createdAt]);
     const name = review.user?.username || "Usuário";
-    const avatar = review.user?.avatarUrl ||
-        "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/male/512/20.jpg";
     return (<View style={styles.reviewRow}>
-      <Image source={{ uri: avatar }} style={styles.avatarImage}/>
+      <Avatar avatarUrl={review.user?.avatarUrl} size={44} style={styles.avatarImage}/>
       <View style={styles.reviewCol}>
         <View style={styles.reviewHeader}>
           <AppText weight="bold" style={styles.userName}>{name}</AppText>

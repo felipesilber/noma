@@ -3,7 +3,6 @@ import {
   View,
   TextInput,
   Pressable,
-  KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
   TouchableOpacity,
@@ -126,11 +125,7 @@ const RegisterScreen = ({ navigation }) => {
   }
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      onLayout={onLayoutRootView}
-    >
+    <View style={styles.container} onLayout={onLayoutRootView}>
       <View style={styles.header}>
         <BackButton onPress={back} style={styles.backButton} />
       </View>
@@ -146,8 +141,11 @@ const RegisterScreen = ({ navigation }) => {
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        keyboardDismissMode="interactive"
       >
         <AppText weight="bold" style={styles.title}>
           {titles[step]}
@@ -302,7 +300,7 @@ const RegisterScreen = ({ navigation }) => {
           )}
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </View>
     </TouchableWithoutFeedback>
   );
 };

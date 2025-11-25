@@ -10,6 +10,7 @@ import colors from "../../../theme/colors";
 import api from "../../../services/api";
 import AppText from "../../../components/text";
 import BackButton from "../../../components/BackButton";
+import Avatar from "../../../components/avatar";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebase/firebase";
 import { showErrorNotification, showSuccessNotification } from "../../../utils/notifications";
@@ -363,10 +364,7 @@ const ProfileScreen = ({ navigation, route }) => {
             onPress={() => setShowAvatarOptions(true)}
             activeOpacity={0.8}
           >
-            <Image source={{
-            uri: avatarUrl ||
-                "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/male/512/20.jpg",
-        }} style={styles.avatar}/>
+            <Avatar avatarUrl={avatarUrl} size={128} style={styles.avatar}/>
           </TouchableOpacity>
           <AppText weight="bold" style={styles.name}>
             {username}

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Image, ActivityIndicator, FlatList, RefreshControl, } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, FlatList, RefreshControl, } from "react-native";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import styles from "./styles";
 import colors from "../../../../theme/colors";
 import api from "../../../../services/api";
+import Avatar from "../../../../components/avatar";
 import ErrorView from "../../../../components/ErrorView";
 const mockMayKnow = [
     {
@@ -50,7 +51,7 @@ const FollowButton = ({ initialIsFollowing, onPress }) => {
 };
 const UserCard = ({ user, onFollowToggle, onPress }) => (<View style={styles.userCard}>
     <TouchableOpacity style={styles.userCardInfo} activeOpacity={0.8} onPress={onPress ? () => onPress(user) : undefined}>
-      <Image source={{ uri: user.avatar }} style={styles.avatar}/>
+      <Avatar avatarUrl={user.avatar} size={50} style={styles.avatar}/>
       <View>
         <Text style={styles.userName}>{user.name}</Text>
         <Text style={styles.userDetails}>{user.details}</Text>
@@ -100,7 +101,7 @@ const ExplorePeopleScreen = ({ navigation }) => {
             const mappedPopular = suggestionsRes.data.map((u) => ({
                 id: u.id,
                 name: u.username,
-                avatar: u.avatarUrl || "https://i.imgur.com/83Qt5J7.png",
+                avatar: u.avatarUrl,
                 details: u.details,
                 isFollowing: u.isFollowing,
             }));
@@ -108,7 +109,7 @@ const ExplorePeopleScreen = ({ navigation }) => {
             const mappedActive = activeRes.data.map((u) => ({
                 id: u.id,
                 name: u.username,
-                avatar: u.avatarUrl || "https://i.imgur.com/83Qt5J7.png",
+                avatar: u.avatarUrl,
                 details: u.details,
                 isFollowing: u.isFollowing,
             }));
@@ -135,7 +136,7 @@ const ExplorePeopleScreen = ({ navigation }) => {
             const mappedResults = data.map((user) => ({
                 id: user.id,
                 name: user.username,
-                avatar: user.avatarUrl || "https://i.imgur.com/83Qt5J7.png",
+                avatar: user.avatarUrl,
                 details: `Nível ${user.level}`,
                 isFollowing: user.isFollowing,
             }));

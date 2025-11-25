@@ -8,6 +8,7 @@ import api from "../../../services/api";
 import moment from "moment";
 import "moment/locale/pt-br";
 import AppText from "../../../components/text";
+import Avatar from "../../../components/avatar";
 import { showErrorNotification, showSuccessNotification } from "../../../utils/notifications";
 import RatingsSummary from "./components/RatingsSummary";
 import BackButton from "../../../components/BackButton";
@@ -31,10 +32,8 @@ const RatingBar = ({ rating }) => {
 const ReviewCard = ({ review }) => {
     const timeAgo = moment(review.createdAt).locale("pt-br").fromNow();
     const userName = review.user?.name || "Usuário";
-    const avatarUrl = review.user?.avatarUrl ||
-        "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/male/512/20.jpg";
     return (<View style={styles.reviewCardContainer}>
-      <Image source={{ uri: avatarUrl }} style={styles.reviewAvatar}/>
+      <Avatar avatarUrl={review.user?.avatarUrl} size={40} style={styles.reviewAvatar}/>
       <View style={styles.reviewContent}>
         <View style={styles.reviewHeader}>
           <View>

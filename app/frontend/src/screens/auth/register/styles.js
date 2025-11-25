@@ -40,6 +40,10 @@ export default StyleSheet.create({
         paddingHorizontal: 24,
         paddingTop: 24,
     },
+    scrollContent: {
+        flexGrow: 1,
+        paddingBottom: 120,
+    },
     title: {
         color: colors.textPrimary,
         fontSize: 28,

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, TouchableOpacity, ActivityIndicator, FlatList, Image } from "react-native";
+import { View, TouchableOpacity, ActivityIndicator, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
@@ -8,14 +8,13 @@ import colors from "../../../../theme/colors";
 import AppText from "../../../../components/text";
 import api from "../../../../services/api";
 import FollowButton from "../../../../components/follow/FollowButton";
+import Avatar from "../../../../components/avatar";
 import { followUser, unfollowUser } from "../../../../services/follow";
 import ErrorView from "../../../../components/ErrorView";
 const UserRow = ({ user, onToggleFollow, onPress }) => {
-    const avatar = user.avatarUrl ||
-        "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/female/512/20.jpg";
     return (<View style={styles.row}>
       <TouchableOpacity style={styles.left} onPress={onPress}>
-        <Image source={{ uri: avatar }} style={styles.avatar}/>
+        <Avatar avatarUrl={user.avatarUrl} size={styles.avatar?.width || 48} style={styles.avatar}/>
         <View>
           <AppText weight="bold" style={styles.username}>{user.username}</AppText>
         </View>
