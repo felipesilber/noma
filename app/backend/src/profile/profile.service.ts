@@ -119,7 +119,7 @@ export class ProfileService {
         });
         return rows.map((r) => r.place);
     }
-    async updateAvatar(userId: number, avatarUrl: string) {
+    async updateAvatar(userId: number, avatarUrl: string | null) {
         const user = await this.prisma.user.update({
             where: { id: userId },
             data: { avatarUrl },

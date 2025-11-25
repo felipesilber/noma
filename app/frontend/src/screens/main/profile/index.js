@@ -235,7 +235,7 @@ const ProfileScreen = ({ navigation, route }) => {
             return;
         try {
             setUploadingAvatar(true);
-            await api.delete("/profile/avatar");
+            await api.put("/profile/avatar", { avatarUrl: null });
             setProfileData((prev) => (prev ? { ...prev, avatarUrl: null } : prev));
             showSuccessNotification(
               "Foto removida",
@@ -445,26 +445,32 @@ const ProfileScreen = ({ navigation, route }) => {
         <Section title="Lugares Favoritos" actionIcon={isOwnProfile && favoritePlaces.length > 0 ? "create-outline" : null} onPressAction={isOwnProfile
             ? () => navigation.navigate("EditFavoritesScreen")
             : null}>
-          <FlatList data={favoritePlaces} renderItem={({ item }) => (<PlaceCarouselCard item={{ ...item, image: item.imageUrl }} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>)} ListEmptyComponent={<EmptyStateCard title="Nenhum lugar favorito ainda" description="Adicione seus restaurantes e bares preferidos para acessá-los rapidamente." buttonText={isOwnProfile ? "Adicionar Favorito" : null} onPress={isOwnProfile
+          {favoritePlaces.length === 0 ? (<EmptyStateCard title="Nenhum lugar favorito ainda" description="Adicione seus restaurantes e bares preferidos para acessá-los rapidamente." buttonText={isOwnProfile ? "Adicionar Favorito" : null} onPress={isOwnProfile
                 ? () => navigation.navigate("AddFavoriteFlow")
-                : undefined}/>} keyExtractor={(item) => String(item.id)} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}/>
+                : undefined}/>) : (<View style={styles.horizontalList}>
+            <FlatList data={favoritePlaces} renderItem={({ item }) => (<PlaceCarouselCard item={{ ...item, image: item.imageUrl }} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>)} keyExtractor={(item) => String(item.id)} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList} nestedScrollEnabled={true}/>
+          </View>)}
         </Section>
 
         <Section title="Visitados recentemente">
-          <FlatList data={carousels?.recentlyVisitedPlaces} renderItem={({ item }) => (<PlaceCarouselCard item={{ ...item, image: item.imageUrl }} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>)} ListEmptyComponent={<EmptyStateCard title="Nenhuma visita registrada" description="Registre suas visitas aos restaurantes e bares para acompanhar seus últimos locais." buttonText={isOwnProfile ? "Registrar Visita" : null} onPress={isOwnProfile
+          {(!carousels?.recentlyVisitedPlaces || carousels.recentlyVisitedPlaces.length === 0) ? (<EmptyStateCard title="Nenhuma visita registrada" description="Registre suas visitas aos restaurantes e bares para acompanhar seus últimos locais." buttonText={isOwnProfile ? "Registrar Visita" : null} onPress={isOwnProfile
                 ? () => navigation.navigate("AddReviewFlow")
-                : undefined}/>} keyExtractor={(item) => String(item.id)} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList}/>
+                : undefined}/>) : (<View style={styles.horizontalList}>
+            <FlatList data={carousels?.recentlyVisitedPlaces} renderItem={({ item }) => (<PlaceCarouselCard item={{ ...item, image: item.imageUrl }} onPress={() => navigation.navigate("PlaceDetail", { placeId: item.id })}/>)} keyExtractor={(item) => String(item.id)} horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalList} nestedScrollEnabled={true}/>
+          </View>)}
         </Section>
 
         <Section title="Listas" actionIcon={isOwnProfile && userLists.length > 0 ? "create-outline" : null} onPressAction={isOwnProfile
             ? () => navigation.navigate("EditListsScreen")
             : null}>
-          <FlatList data={userLists} renderItem={({ item }) => (<UserListCard item={item} onPress={() => navigation.navigate("ListDetail", {
+          {userLists.length === 0 ? (<EmptyStateCard title="Nenhuma lista criada" description="Crie listas personalizadas de restaurantes e bares para organizar seus lugares favoritos." buttonText={isOwnProfile ? "Criar Nova Lista" : null} onPress={isOwnProfile
+                ? () => navigation.navigate("CreateListFlow")
+                : undefined}/>) : (<View style={styles.verticalList}>
+            {userLists.map((item) => (<UserListCard key={String(item.id)} item={item} onPress={() => navigation.navigate("ListDetail", {
                 listId: item.id,
                 listName: item.name,
-            })}/>)} ListEmptyComponent={<EmptyStateCard title="Nenhuma lista criada" description="Crie listas personalizadas de restaurantes e bares para organizar seus lugares favoritos." buttonText={isOwnProfile ? "Criar Nova Lista" : null} onPress={isOwnProfile
-                ? () => navigation.navigate("CreateListFlow")
-                : undefined}/>} keyExtractor={(item) => String(item.id)} scrollEnabled={false} showsVerticalScrollIndicator={false} contentContainerStyle={styles.verticalList}/>
+            })}/>))}
+          </View>)}
         </Section>
 
         <View style={{ height: 40 }}/>

@@ -68,7 +68,7 @@ export class ProfileController {
     @UserId()
     userId: number, 
     @Body('avatarUrl')
-    avatarUrl: string) {
+    avatarUrl: string | null) {
         return this.profile.updateAvatar(userId, avatarUrl);
     }
 }

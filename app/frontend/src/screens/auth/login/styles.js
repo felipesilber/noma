@@ -15,14 +15,16 @@ export default StyleSheet.create({
     },
     safeArea: {
         flex: 1,
-        justifyContent: "flex-start",
         paddingHorizontal: 24,
         paddingVertical: 40,
     },
+    scrollContent: {
+        flexGrow: 1,
+    },
     contentContainer: {
-        flex: 1,
         justifyContent: "flex-start",
         paddingTop: 150,
+        paddingBottom: 40,
     },
     header: {
         alignItems: "center",
