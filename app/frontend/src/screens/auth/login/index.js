@@ -26,20 +26,16 @@ const LoginScreen = ({ navigation }) => {
         catch (e) {
             console.error("Erro no login:", e);
             const code = e?.code || "";
-            if (code.includes("invalid-email"))
-                setErrorMsg("E-mail inválido.");
+            if (code.includes("invalid-email") || code.includes("user-not-found") || code.includes("wrong-password"))
+                setErrorMsg("Email ou senha inválidos.");
             else if (code.includes("user-disabled"))
                 setErrorMsg("Esta conta foi desativada.");
-            else if (code.includes("user-not-found"))
-                setErrorMsg("Usuário não encontrado.");
-            else if (code.includes("wrong-password"))
-                setErrorMsg("Senha incorreta.");
             else if (code.includes("too-many-requests"))
                 setErrorMsg("Muitas tentativas. Tente novamente em instantes.");
             else if (code.includes("network-request-failed"))
                 setErrorMsg("Falha de rede. Verifique sua conexão.");
             else
-                setErrorMsg("E-mail ou senha inválidos. Tente novamente.");
+                setErrorMsg("Email ou senha inválidos.");
         }
         finally {
             setLoading(false);

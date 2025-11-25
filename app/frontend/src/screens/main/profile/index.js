@@ -9,6 +9,7 @@ import styles from "./styles";
 import colors from "../../../theme/colors";
 import api from "../../../services/api";
 import AppText from "../../../components/text";
+import BackButton from "../../../components/BackButton";
 import { signOut } from "firebase/auth";
 import { auth } from "../../../firebase/firebase";
 import { showErrorNotification, showSuccessNotification } from "../../../utils/notifications";

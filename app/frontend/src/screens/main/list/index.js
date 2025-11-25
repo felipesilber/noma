@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, RefreshControl, } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles";
 import colors from "../../../theme/colors";
 import moment from "moment";
@@ -42,8 +43,8 @@ const ListCoverImage = ({ items, fallbackImageUrl }) => {
 };
 const PlaceItem = ({ item, index, isRanking, onPress }) => {
     const place = item.place;
-    const rating = 4.5;
-    const distance = 0.8;
+    const rating = place.rating || place.avgRating || 4.5;
+    const distance = place.distanceInKm || 0.8;
     return (<TouchableOpacity style={styles.placeItemContainer} onPress={onPress}>
       {isRanking && (<View style={styles.placeRankBadge}>
           <Text style={styles.placeRankText}>{index + 1}</Text>
@@ -51,7 +52,11 @@ const PlaceItem = ({ item, index, isRanking, onPress }) => {
       <Image source={{ uri: place.imageUrl }} style={styles.placeItemImage}/>
       <View style={styles.placeItemInfo}>
         <Text style={styles.placeItemName}>{place.name}</Text>
-        <Text style={styles.placeItemDetails}>{`${rating.toFixed(1)} · ${distance.toFixed(1)} km`}</Text>
+        <View style={styles.ratingContainer}>
+          <Text style={styles.placeItemDetails}>{rating.toFixed(1)}</Text>
+          <Ionicons name="star" size={14} color={colors.textSecondary} style={styles.starIcon}/>
+          <Text style={styles.placeItemDetails}>{` · ${distance.toFixed(1)} km`}</Text>
+        </View>
       </View>
     </TouchableOpacity>);
 };

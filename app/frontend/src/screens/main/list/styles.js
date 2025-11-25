@@ -100,4 +100,11 @@ export default StyleSheet.create({
         fontSize: 14,
         color: colors.textSecondary,
     },
+    ratingContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    starIcon: {
+        marginHorizontal: 4,
+    },
 });
