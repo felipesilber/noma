@@ -31,6 +31,7 @@ import EditFavoritesScreen from "../screens/main/profile/edit-favorites";
 import EditListsScreen from "../screens/main/profile/edit-lists";
 import ConnectionsScreen from "../screens/main/profile/connections";
 import BackButton from "../components/BackButton";
+import FriendsActivitiesScreen from "../screens/main/friends-activities";
 const AuthStack = createNativeStackNavigator();
 const MainTab = createBottomTabNavigator();
 const RootStack = createNativeStackNavigator();
@@ -71,6 +72,11 @@ const HomeFlow = () => (<HomeStack.Navigator screenOptions={{
     <HomeStack.Screen name="PlaceDetail" component={PlaceDetailScreen} options={{ headerShown: false }}/>
     <HomeStack.Screen name="PlaceAllReviews" component={AllReviewsScreen} options={{ headerShown: false }}/>
     <HomeStack.Screen name="UserConnections" component={ConnectionsScreen} options={{ headerShown: false }}/>
+    <HomeStack.Screen
+      name="FriendsActivities"
+      component={FriendsActivitiesScreen}
+      options={{ headerShown: false }}
+    />
   </HomeStack.Navigator>);
 const ProfileFlow = () => (<ProfileStack.Navigator screenOptions={{
         headerStyle: { backgroundColor: colors.background },

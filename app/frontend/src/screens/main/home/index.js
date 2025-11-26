@@ -187,10 +187,38 @@ const HomeScreen = ({ navigation }) => {
 
         <Section title="Atividade dos seus amigos">
           <View style={{ paddingHorizontal: 16 }}>
-            {feedData?.friendActivityPreview?.length > 0 ? (feedData.friendActivityPreview.map((item, index) => (<AmigoActivityCard key={index} item={{
-                avatar: item.user.avatarUrl,
-                actionText: item.actionText,
-            }}/>))) : (<ConnectFriendsCard onPress={() => navigation.navigate("Explore", { screen: "ExplorePeople" })}/>)}
+            {feedData?.friendActivityPreview?.length > 0 ? (
+              <>
+                {feedData.friendActivityPreview.map((item, index) => (
+                  <AmigoActivityCard
+                    key={index}
+                    item={{
+                      avatar: item.user.avatarUrl,
+                      actionText: item.actionText,
+                    }}
+                  />
+                ))}
+                <TouchableOpacity
+                  style={styles.seeAllButton}
+                  onPress={() => navigation.navigate("FriendsActivities")}
+                >
+                  <AppText weight="bold" style={styles.seeAllButtonText}>
+                    Ver todas as atividades
+                  </AppText>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={colors.primary}
+                  />
+                </TouchableOpacity>
+              </>
+            ) : (
+              <ConnectFriendsCard
+                onPress={() =>
+                  navigation.navigate("Explore", { screen: "ExplorePeople" })
+                }
+              />
+            )}
           </View>
         </Section>
 

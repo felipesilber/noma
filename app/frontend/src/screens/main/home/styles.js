@@ -176,4 +176,18 @@ export default StyleSheet.create({
         fontSize: 12,
         color: colors.primary,
     },
+    seeAllButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 12,
+        paddingVertical: 12,
+        backgroundColor: colors.surface,
+        borderRadius: 8,
+    },
+    seeAllButtonText: {
+        fontSize: 14,
+        color: colors.primary,
+        marginRight: 4,
+    },
 });

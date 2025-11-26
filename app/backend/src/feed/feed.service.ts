@@ -171,4 +171,96 @@ export class FeedService {
             friendsReviewsCount,
         };
     }
+
+    async getFriendsActivities(userId: number, page = 1, limit = 20) {
+        const following = await this.prisma.follow.findMany({
+            where: { followerId: userId },
+            select: { followedId: true },
+        });
+        const friendIds = following.map((f) => f.followedId);
+        if (friendIds.length === 0) {
+            return {
+                data: [],
+                pagination: {
+                    page,
+                    limit,
+                    total: 0,
+                    totalPages: 0,
+                },
+            };
+        }
+        const skip = (page - 1) * limit;
+        const [total, activities] = await Promise.all([
+            this.prisma.activity.count({
+                where: { userId: { in: friendIds } },
+            }),
+            this.prisma.activity.findMany({
+                where: { userId: { in: friendIds } },
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+                include: {
+                    user: { select: { id: true, username: true, avatarUrl: true } },
+                    place: { select: { id: true, name: true, imageUrl: true } },
+                    review: { select: { id: true, generalRating: true } },
+                    list: { select: { id: true, name: true } },
+                },
+            }),
+        ]);
+        const data = activities.map((act) => {
+            let actionText = '';
+            const placeName = act.place?.name || 'um lugar';
+            switch (act.type) {
+                case 'REVIEWED':
+                    const rating = act.review?.generalRating;
+                    if (rating) {
+                        actionText = `avaliou ${placeName} com ${rating} estrelas`;
+                    }
+                    else {
+                        actionText = `avaliou ${placeName}`;
+                    }
+                    break;
+                case 'SAVED':
+                    actionText = `salvou ${placeName}`;
+                    break;
+                case 'CHECKED_IN':
+                    actionText = `fez check-in em ${placeName}`;
+                    break;
+                case 'CREATED_LIST':
+                    actionText = `criou a lista "${act.list?.name || 'uma nova lista'}"`;
+                    break;
+                default:
+                    actionText = 'realizou uma atividade.';
+            }
+            return {
+                id: act.id,
+                type: act.type,
+                user: act.user,
+                actionText: `${act.user.username || 'Um usuário'} ${actionText}`,
+                timestamp: act.createdAt,
+                place: act.place ? {
+                    id: act.place.id,
+                    name: act.place.name,
+                    imageUrl: act.place.imageUrl,
+                } : null,
+                review: act.review ? {
+                    id: act.review.id,
+                    rating: act.review.generalRating,
+                } : null,
+                list: act.list ? {
+                    id: act.list.id,
+                    name: act.list.name,
+                } : null,
+            };
+        });
+        return {
+            data,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
+    }
 }
