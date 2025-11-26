@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Image, StyleSheet } from "react-native";
-import styles from "../../styles";
+import { View, Image } from "react-native";
+import styles from "../styles";
 
 const ListCoverImage = ({ items, fallbackImageUrl, style }) => {
     const images = (items || [])
