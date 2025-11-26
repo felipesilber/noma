@@ -123,9 +123,7 @@ const RegisterScreen = ({ navigation }) => {
       setLoading(false);
     }
   }
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-    <View style={styles.container} onLayout={onLayoutRootView}>
+  const content = (<View style={styles.container} onLayout={onLayoutRootView}>
       <View style={styles.header}>
         <BackButton onPress={back} style={styles.backButton} />
       </View>
@@ -300,8 +298,14 @@ const RegisterScreen = ({ navigation }) => {
           )}
         </Pressable>
       </View>
-    </View>
-    </TouchableWithoutFeedback>
-  );
+    </View>);
+    
+    if (Platform.OS === "web") {
+        return content;
+    }
+    
+    return (<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      {content}
+    </TouchableWithoutFeedback>);
 };
 export default RegisterScreen;
